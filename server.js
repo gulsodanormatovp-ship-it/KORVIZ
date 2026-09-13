@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const { Telegraf } = require('telegraf');
 
 const app = express();
 
@@ -42,10 +43,12 @@ let enterpriseState = {
         { id: "tok_v50_live_9981", name: "Production Enterprise Gateway Key", created: new Date() }
     ],
     auditLogs: [
-        { type: "KERNEL", msg: "KORVIZ v50.0 Enterprise Kernel initialized successfully with 10 modules.", date: new Date() },
-        { type: "SECURITY", msg: "Glassmorphism UI Shield and Vault encryption online.", date: new Date() }
+        { type: "KERNEL", msg: "KORVIZ v50.0 Enterprise Kernel initialized successfully with 10 modules and Live Deploy.", date: new Date() },
+        { type: "SECURITY", msg: "Glassmorphism UI Shield, Vault encryption, and Bot Engine online.", date: new Date() }
     ]
 };
+
+let activeRunningBots = {}; // Serverda jonli ishlayotgan botlar obyekti
 
 // Helper: Log generator
 function writeAuditLog(type, msg) {
@@ -67,11 +70,13 @@ app.get('/api/analytics', (req, res) => {
         const totalCols = Object.keys(enterpriseState.collections).length;
         const totalRepos = enterpriseState.repositories.length;
         const onlineMonitors = enterpriseState.monitors.filter(m => m.status === 'ONLINE').length;
+        const activeBotsCount = Object.keys(activeRunningBots).length;
         
         res.json({
             monitorsStatus: `${onlineMonitors}/${enterpriseState.monitors.length} Online`,
             totalCollections: totalCols,
             totalRepos: totalRepos,
+            activeServices: `${activeBotsCount}/2 Online`,
             ramUsage: `${Math.floor(process.memoryUsage().heapUsed / 1024 / 1024)} MB`,
             uptime: process.uptime()
         });
@@ -130,7 +135,6 @@ app.post('/api/db/collection/create', (req, res) => {
 // API ROUTES: SECRET VAULT (ENV MANAGER)
 // ==========================================
 app.get('/api/env', (req, res) => {
-    // Mask values for security when listing
     const maskedSecrets = enterpriseState.secrets.map(s => ({
         key: s.key,
         value: "••••••••••••••••",
@@ -151,7 +155,6 @@ app.post('/api/env/create', (req, res) => {
         enterpriseState.secrets.push({ key, value, updated_at: new Date() });
     }
 
-    // Set in runtime process environment as well
     process.env[key] = value;
 
     writeAuditLog("VAULT", `Secret key stored and encrypted: ${key}`);
@@ -219,7 +222,6 @@ app.post('/api/sandbox/execute', (req, res) => {
                 outputBuffer.push(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' '));
             };
 
-            // Safe isolated evaluation simulation
             const sandboxFunction = new Function('console', `
                 try {
                     ${code}
@@ -291,6 +293,36 @@ app.post('/api/ai/generate', (req, res) => {
 });
 
 // ==========================================
+// API ROUTES: LIVE BOT DEPLOYMENT ON SERVER
+// ==========================================
+app.post('/api/bots/deploy-live', async (req, res) => {
+    const { token, botName } = req.body;
+    if (!token) return res.status(400).json({ error: "Bot token talab qilinadi!" });
+
+    try {
+        if (activeRunningBots[token]) {
+            try {
+                await activeRunningBots[token].stop('SIGINT');
+            } catch (e) {}
+        }
+
+        const liveBot = new Telegraf(token);
+
+        liveBot.start((ctx) => ctx.reply("Salom! KORVIZ Enterprise v50.0 orqali to'g'ridan-to'g'ri serverda ishga tushdim! 🚀"));
+        liveBot.help((ctx) => ctx.reply("KORVIZ jonli bot xizmati faol ishlamoqda."));
+        liveBot.on('text', (ctx) => ctx.reply(`Sizning xabaringiz qabul qilindi: ${ctx.message.text}`));
+
+        liveBot.launch();
+        activeRunningBots[token] = liveBot;
+
+        writeAuditLog("BOT_DEPLOY", `Live telegram bot successfully deployed: ${botName || 'Custom Bot'}`);
+        res.json({ success: true, message: "Bot serverda jonli ishga tushdi va Telegramda ishlamoqda!" });
+    } catch (err) {
+        res.status(500).json({ error: "Botni ishga tushirishda xatolik: " + err.message });
+    }
+});
+
+// ==========================================
 // API ROUTES: HTTP REQUEST STUDIO
 // ==========================================
 app.post('/api/tools/http-request', async (req, res) => {
@@ -333,5 +365,6 @@ app.listen(PORT, () => {
     console.log(`============================================`);
     console.log(` KORVIZ Enterprise v50.0 Kernel Running     `);
     console.log(` Port: ${PORT} | Mode: Production Cloud      `);
+    console.log(` Live Bot Deployment & Sandbox Active       `);
     console.log(`============================================`);
 });
