@@ -3,855 +3,406 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- SEO & Verification -->
-    <meta name="google-site-verification" content="SdvV34hpJhOXUIwF-VNs9ZH2N3g3HwYTolkfEohD668" />
-    <title>KORVIZ | Enterprise Cloud Platform & AI Ecosystem v50.0</title>
-    <meta name="title" content="KORVIZ | Enterprise Cloud Platform & AI Ecosystem v50.0">
-    <meta name="description" content="Next-Generation 50x Cloud Platform for AI Developers, Telegram Bot Builders, Microservices, Real-time Monitoring and Cloud Databases.">
-    <meta name="keywords" content="korviz, cloud platform, ai bot engine, nodejs sandbox, python sandbox, uptime monitor, cloud nosql, api studio">
-    <meta name="robots" content="index, follow">
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2307090e'/><path d='M55 12 L22 52 H48 L41 88 L78 48 H52 Z' fill='%2338bdf8' stroke='%230284c7' stroke-width='3'/></svg>">
-
-    <!-- Styles -->
+    <title>KORVIZ v50.0 Enterprise Cloud & AI Studio</title>
     <style>
-        :root {
-            --bg-dark: #05070c;
-            --sidebar-bg: rgba(10, 15, 26, 0.95);
-            --panel-bg: rgba(16, 23, 38, 0.75);
-            --border-color: rgba(56, 189, 248, 0.2);
-            --neon-glow: #38bdf8;
-            --neon-blue: #0284c7;
-            --accent-purple: #8b5cf6;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #090d16; color: #f8fafc; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar Styling */
+        aside { width: 285px; background: #0f172a; border-right: 1px solid #1e293b; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .logo { font-size: 22px; font-weight: bold; color: #38bdf8; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        .menu-category { font-size: 11px; text-transform: uppercase; color: #64748b; margin: 15px 0 5px 10px; letter-spacing: 1px; font-weight: bold; }
+        .menu-item { padding: 12px 15px; border-radius: 8px; color: #94a3b8; cursor: pointer; transition: 0.2s; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+        .menu-item:hover, .menu-item.active { background: #0284c7; color: #fff; }
 
-        * {
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+        /* Main Workspace Styling */
+        main { flex: 1; padding: 35px; overflow-y: auto; background: #090d16; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .header h1 { font-size: 26px; color: #fff; }
+        .badge { background: #065f46; color: #34d399; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #047857; }
 
-        body {
-            background: var(--bg-dark);
-            color: var(--text-main);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
+        .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .card h3 { margin-bottom: 15px; color: #38bdf8; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+        
+        .form-control { width: 100%; padding: 12px 15px; background: #030712; border: 1px solid #374151; color: #fff; border-radius: 8px; margin-bottom: 15px; font-size: 14px; outline: none; transition: 0.2s; }
+        .form-control:focus { border-color: #0284c7; box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2); }
+        
+        .btn { background: #0ea5e9; color: white; border: none; padding: 12px 22px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn:hover { background: #0284c7; }
+        .btn-success { background: #10b981; }
+        .btn-success:hover { background: #059669; }
 
-        /* SIDEBAR */
-        .sidebar {
-            width: 310px;
-            background: var(--sidebar-bg);
-            border-right: 1px solid var(--border-color);
-            padding: 24px 18px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            backdrop-filter: blur(16px);
-            z-index: 20;
-        }
+        pre { background: #030712; padding: 15px; border-radius: 8px; color: #34d399; overflow-x: auto; font-family: monospace; font-size: 13px; margin-top: 10px; border: 1px solid #1f2937; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-box { background: #111827; border: 1px solid #1f2937; padding: 20px; border-radius: 10px; }
+        .stat-box span { color: #94a3b8; font-size: 13px; }
+        .stat-box h2 { font-size: 24px; margin-top: 5px; color: #fff; }
 
-        .brand-box {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .brand-logo {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--neon-glow), var(--neon-blue));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 900;
-            color: #fff;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
-        }
-
-        .brand-title {
-            font-size: 20px;
-            font-weight: 900;
-            letter-spacing: 1.5px;
-            color: #fff;
-        }
-
-        .brand-title span {
-            color: var(--neon-glow);
-        }
-
-        .nav-section-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-sub);
-            margin: 14px 10px 6px 10px;
-            font-weight: 700;
-        }
-
-        .nav-group {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            overflow-y: auto;
-            max-height: calc(100vh - 220px);
-            padding-right: 4px;
-        }
-
-        .nav-group::-webkit-scrollbar {
-            width: 4px;
-        }
-        .nav-group::-webkit-scrollbar-thumb {
-            background: rgba(56, 189, 248, 0.2);
-            border-radius: 4px;
-        }
-
-        .menu-btn {
-            background: transparent;
-            border: 1px solid transparent;
-            color: var(--text-sub);
-            width: 100%;
-            text-align: left;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .menu-btn:hover {
-            background: rgba(56, 189, 248, 0.08);
-            color: #ffffff;
-            border-color: rgba(56, 189, 248, 0.2);
-            transform: translateX(4px);
-        }
-
-        .menu-btn.active {
-            background: linear-gradient(90deg, #0284c7, #0369a1);
-            color: #ffffff;
-            box-shadow: 0 0 18px rgba(2, 132, 199, 0.4);
-            border: none;
-        }
-
-        /* MAIN CONTAINER */
-        .main-content {
-            flex: 1;
-            padding: 28px 36px;
-            overflow-y: auto;
-            background: radial-gradient(circle at 85% 15%, rgba(14, 165, 233, 0.08), transparent 45%),
-                        radial-gradient(circle at 15% 85%, rgba(139, 92, 246, 0.06), transparent 40%);
-        }
-
-        .top-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header-left h1 {
-            font-size: 26px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        .header-left p {
-            font-size: 13px;
-            color: var(--text-sub);
-            margin-top: 4px;
-        }
-
-        .status-badge {
-            font-size: 12px;
-            padding: 6px 14px;
-            border-radius: 20px;
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--success);
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--success);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.2); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        /* METRICS GRID */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .metric-card {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            padding: 18px 20px;
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            transition: all 0.2s;
-        }
-
-        .metric-card:hover {
-            border-color: rgba(56, 189, 248, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .metric-title {
-            font-size: 11px;
-            color: var(--text-sub);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .metric-value {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--neon-glow);
-            margin-top: 6px;
-        }
-
-        /* PANELS */
-        .panel {
-            display: none;
-        }
-        .panel.active {
-            display: block;
-            animation: fadeIn 0.25s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 22px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-        }
-
-        .card h2 {
-            font-size: 17px;
-            font-weight: 700;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* FORM ELEMENTS */
-        .form-row {
-            display: flex;
-            gap: 14px;
-            margin-bottom: 14px;
-        }
-
-        .form-group {
-            flex: 1;
-            margin-bottom: 14px;
-        }
-
-        label {
-            display: block;
-            font-size: 12px;
-            color: var(--text-sub);
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-
-        input[type="text"], input[type="password"], textarea, select {
-            width: 100%;
-            padding: 10px 14px;
-            background: rgba(5, 7, 12, 0.85);
-            border: 1px solid #1e293b;
-            color: #ffffff;
-            border-radius: 8px;
-            outline: none;
-            font-size: 13px;
-            transition: all 0.2s;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            border-color: var(--neon-glow);
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
-        }
-
-        .btn {
-            background: linear-gradient(90deg, #0284c7, #0369a1);
-            color: #ffffff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 13px;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 0 12px rgba(2, 132, 199, 0.3);
-        }
-
-        .btn:hover {
-            opacity: 0.95;
-            transform: translateY(-1px);
-            box-shadow: 0 0 18px rgba(2, 132, 199, 0.5);
-        }
-
-        .btn-purple {
-            background: linear-gradient(90deg, #8b5cf6, #6d28d9);
-            box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
-        }
-
-        .btn-success {
-            background: linear-gradient(90deg, #10b981, #047857);
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
-        }
-
-        .code-area {
-            background: #030509;
-            color: #38bdf8;
-            font-family: "Fira Code", Monaco, Consolas, monospace;
-            font-size: 13px;
-            line-height: 1.6;
-            min-height: 180px;
-            border: 1px solid #1e293b;
-            padding: 16px;
-            border-radius: 8px;
-            white-space: pre-wrap;
-            overflow-x: auto;
-        }
-
-        .data-item {
-            background: rgba(10, 15, 26, 0.7);
-            border: 1px solid var(--border-color);
-            padding: 14px 18px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #1f2937; font-size: 14px; }
+        th { color: #94a3b8; font-weight: 600; }
+        td { color: #e2e8f0; }
     </style>
 </head>
 <body>
 
-    <!-- SIDEBAR NAVIGATION -->
-    <div class="sidebar">
-        <div>
-            <div class="brand-box">
-                <div class="brand-logo">⚡</div>
-                <div>
-                    <div class="brand-title">KORVIZ <span>v50.0</span></div>
-                    <small style="color:var(--text-sub); font-size:10px;">Enterprise AI Cloud</small>
+    <!-- Sidebar Navigation -->
+    <aside>
+        <div class="logo">⚡ KORVIZ v50.0</div>
+        
+        <div class="menu-category">Core Operations</div>
+        <div class="menu-item active" onclick="switchTab('analytics', event)">📊 System Analytics</div>
+        <div class="menu-item" onclick="switchTab('sandbox', event)">⚡ Multi-Lang Sandbox</div>
+        <div class="menu-item" onclick="switchTab('api-studio', event)">🌐 Enterprise API Studio</div>
+        <div class="menu-item" onclick="switchTab('ai-engine', event)">🤖 AI Bot & Workflow Engine</div>
+
+        <div class="menu-category">Database & Storage</div>
+        <div class="menu-item" onclick="switchTab('database', event)">🗄️ Cloud NoSQL Database</div>
+        <div class="menu-item" onclick="switchTab('ide', event)">💻 Code IDE & Workspace</div>
+        <div class="menu-item" onclick="switchTab('vault', event)">🔒 Secret Key Vault</div>
+
+        <div class="menu-category">Monitoring & Security</div>
+        <div class="menu-item" onclick="switchTab('monitors', event)">📈 Infrastructure Monitor</div>
+        <div class="menu-item" onclick="switchTab('tokens', event)">🔑 OAuth Tokens & Access</div>
+        <div class="menu-item" onclick="switchTab('logs', event)">📜 Audit Logs & Events</div>
+    </aside>
+
+    <!-- Main Workspace Container -->
+    <main>
+        <div class="header">
+            <h1 id="page-title">System Analytics</h1>
+            <div class="badge">ENTERPRISE ENGINE ACTIVE (50X)</div>
+        </div>
+
+        <!-- STATS BAR -->
+        <div class="stats-grid">
+            <div class="stat-box"><span>Faol Servislar</span><h2 id="st-services">2/2 Online</h2></div>
+            <div class="stat-box"><span>NoSQL Kolleksiyalar</span><h2 id="st-cols">3</h2></div>
+            <div class="stat-box"><span>API So'rovlar (24s)</span><h2>204</h2></div>
+            <div class="stat-box"><span>Xotira (RAM)</span><h2 id="st-ram">12 MB</h2></div>
+        </div>
+
+        <!-- TAB 1: SYSTEM ANALYTICS -->
+        <div id="tab-analytics" class="tab-content">
+            <div class="card">
+                <h3>📊 Real-Time Server Health & Analytics</h3>
+                <p style="color: #94a3b8; line-height: 1.6; margin-bottom: 20px;">KORVIZ v50.0 klasteri to'liq faol holatda ishlamoqda. Barcha mikroservislar, tarmoq ulanishlari va xavfsizlik qalqonlari barqaror.</p>
+                <div id="audit-log-box" style="background: #030712; padding: 15px; border-radius: 8px; border: 1px solid #1f2937; font-family: monospace; font-size: 13px; color: #34d399; height: 180px; overflow-y: auto;">
+                    [12:38:15 PM] [KERNEL] KORVIZ v50.0 Enterprise Kernel initialized successfully.<br>
+                    [12:38:15 PM] [SECURITY] Glassmorphism UI Shield, Vault encryption, and Bot Engine online.
                 </div>
             </div>
-
-            <div class="nav-group">
-                <div class="nav-section-title">Core Operations</div>
-                <button class="menu-btn active" onclick="switchTab('dashboard', this)">📊 System Analytics</button>
-                <button class="menu-btn" onclick="switchTab('sandbox', this)">⚡ Multi-Lang Sandbox</button>
-                <button class="menu-btn" onclick="switchTab('apistudio', this)">🌐 Enterprise API Studio</button>
-                <button class="menu-btn" onclick="switchTab('aiengine', this)">🤖 AI Bot & Workflow Engine</button>
-
-                <div class="nav-section-title">Database & Storage</div>
-                <button class="menu-btn" onclick="switchTab('database', this)">🗄️ Cloud NoSQL Database</button>
-                <button class="menu-btn" onclick="switchTab('repos', this)">📦 Code IDE & Workspace</button>
-                <button class="menu-btn" onclick="switchTab('vault', this)">🔐 Secret Key Vault</button>
-
-                <div class="nav-section-title">Monitoring & Security</div>
-                <button class="menu-btn" onclick="switchTab('uptime', this)">📡 Infrastructure Monitor</button>
-                <button class="menu-btn" onclick="switchTab('tokens', this)">🔑 OAuth Tokens & Access</button>
-                <button class="menu-btn" onclick="switchTab('logs', this)">📑 Audit Logs & Events</button>
-            </div>
         </div>
 
-        <div style="font-size: 11px; color: var(--text-sub); text-align: center; border-top: 1px solid var(--border-color); padding-top: 12px;">
-            KORVIZ Enterprise Kernel v50.0<br>
-            Protected by Cloud Shields
-        </div>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
-        <!-- HEADER -->
-        <div class="top-header">
-            <div class="header-left">
-                <h1 id="activeTabTitle">System Analytics</h1>
-                <p id="activeTabDesc">Real-time enterprise server health and resource monitoring.</p>
-            </div>
-            <div class="status-badge">
-                <div class="pulse-dot"></div>
-                ENTERPRISE ENGINE ACTIVE (50X)
-            </div>
-        </div>
-
-        <!-- GLOBAL METRICS -->
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-title">Active Services</div>
-                <div class="metric-value" id="mServices">0 / 0</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-title">NoSQL Collections</div>
-                <div class="metric-value" id="mCollections">0</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-title">API Requests (24h)</div>
-                <div class="metric-value" style="color:var(--accent-purple);" id="mRequests">0</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-title">System Memory (RAM)</div>
-                <div class="metric-value" style="color:var(--warning);" id="mRam">0 MB</div>
-            </div>
-        </div>
-
-        <!-- 1. DASHBOARD PANEL -->
-        <div id="dashboard" class="panel active">
+        <!-- TAB 2: MULTI-LANG SANDBOX -->
+        <div id="tab-sandbox" class="tab-content" style="display: none;">
             <div class="card">
-                <h2>📊 Enterprise Cluster Status</h2>
-                <p style="color: var(--text-sub); font-size: 14px; line-height: 1.6;">
-                    KORVIZ v50.0 klasteri to'liq faol holatda. Barcha microservice'lar, NoSQL ma'lumotlar bazasi va Sun'iy Intellekt bot generatorlari yuqori unumdorlikda ishlamoqda.
-                </p>
-            </div>
-            <div class="card">
-                <h2>📑 Jonli Tizim Loglari (Live Audit):</h2>
-                <div id="dashLogsList" class="code-area" style="min-height: 140px; color: #cbd5e1;">Yuklanmoqda...</div>
+                <h3>⚡ Multi-Language Isolation Sandbox</h3>
+                <select id="sandboxLang" class="form-control">
+                    <option value="javascript">JavaScript (Node.js V8)</option>
+                    <option value="python">Python 3.11 Sandbox</option>
+                </select>
+                <textarea id="sandboxCode" class="form-control" rows="6" placeholder="Console.log('KORVIZ Sandbox active');">console.log("KORVIZ Sandbox working perfectly!");</textarea>
+                <button class="btn" onclick="executeSandbox()">🚀 Kodni Ishga Tushirish</button>
+                <pre id="sandboxOutput">Natija bu yerda chiqadi...</pre>
             </div>
         </div>
 
-        <!-- 2. SANDBOX PANEL -->
-        <div id="sandbox" class="panel">
+        <!-- TAB 3: ENTERPRISE API STUDIO -->
+        <div id="tab-api-studio" class="tab-content" style="display: none;">
             <div class="card">
-                <h2>⚡ Multi-Language High-Speed Sandbox</h2>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Dasturlash Tili:</label>
-                        <select id="sandboxLang">
-                            <option value="javascript">JavaScript (Node.js v20)</option>
-                            <option value="python">Python 3.11</option>
-                        </select>
-                    </div>
+                <h3>🌐 Enterprise API Request Studio</h3>
+                <input type="text" id="apiUrl" class="form-control" placeholder="https://api.ipify.org?format=json" value="https://api.ipify.org?format=json">
+                <select id="apiMethod" class="form-control">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                </select>
+                <button class="btn" onclick="sendApiStudioRequest()">So'rov Yuborish</button>
+                <pre id="apiStudioOutput">API javobi shu yerda aks etadi...</pre>
+            </div>
+        </div>
+
+        <!-- TAB 4: AI BOT & WORKFLOW ENGINE (JONLI DEPLOY BILAN) -->
+        <div id="tab-ai-engine" class="tab-content" style="display: none;">
+            <div class="card">
+                <h3>🤖 AI Telegram Bot Konstruktori & Jonli Server Deploy</h3>
+                <p style="color: #94a3b8; margin-bottom: 15px;">Bot tokeningizni kiriting va tugmani bosing — bot darhol Render serverida fon rejimida 24/7 ishlay boshlaydi!</p>
+                
+                <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid #10b981; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
+                    <h4 style="color: #10b981; margin-bottom: 10px;">🚀 Serverda Jonli Ishga Tushirish (Live Deploy)</h4>
+                    <input type="text" id="liveBotToken" class="form-control" placeholder="Telegram Bot Tokeningiz (Masalan: 123456:ABC-DEF...)">
+                    <input type="text" id="liveBotName" class="form-control" placeholder="Bot nomi (Masalan: KORVIZ Enterprise Bot)">
+                    <button class="btn btn-success" onclick="deployLiveBot()">🚀 Botni Serverda Jonli Yoqish</button>
                 </div>
-                <div class="form-group">
-                    <label>Manba Kodi:</label>
-                    <textarea id="sandboxCode" class="code-area" rows="6">console.log("KORVIZ Enterprise v50.0 Running!");</textarea>
-                </div>
-                <button class="btn btn-success" onclick="executeSandbox()">▶ KODNI BAJARISH</button>
-            </div>
-            <div class="card">
-                <h2>🖥 Terminal Chiqishi (Output):</h2>
-                <pre id="sandboxOutput" class="code-area" style="color: #a7f3d0;">// Natija shu yerda ko'rinadi...</pre>
+
+                <h3 style="margin-top: 15px;">AI Kod Generatsiya Qilish</h3>
+                <textarea id="aiPrompt" class="form-control" placeholder="Masalan: Ob-havo ma'lumotlarini beruvchi bot yarat..."></textarea>
+                <button class="btn" onclick="generateAICode()">AI Kod Generatsiya Qilish</button>
+                <pre id="aiCodeResult">// Generatsiya qilingan kod shu yerda paydo bo'ladi...</pre>
             </div>
         </div>
 
-        <!-- 3. API STUDIO PANEL -->
-        <div id="apistudio" class="panel">
+        <!-- TAB 5: CLOUD NOSQL DATABASE -->
+        <div id="tab-database" class="tab-content" style="display: none;">
             <div class="card">
-                <h2>🌐 Enterprise REST API Studio</h2>
-                <div class="form-row">
-                    <div style="width: 130px;">
-                        <label>HTTP Metod:</label>
-                        <select id="apiMethod">
-                            <option value="GET">GET</option>
-                            <option value="POST">POST</option>
-                            <option value="PUT">PUT</option>
-                            <option value="DELETE">DELETE</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>End-point URL:</label>
-                        <input type="text" id="apiUrl" placeholder="https://jsonplaceholder.typicode.com/posts/1">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Request Body (JSON formatida - POST/PUT uchun):</label>
-                    <textarea id="apiBody" class="code-area" rows="3">{}</textarea>
-                </div>
-                <button class="btn" onclick="sendApiRequest()">🚀 SO'ROV YUBORISH</button>
-            </div>
-            <div class="card">
-                <h2>📥 Server Javobi (Response Payload):</h2>
-                <pre id="apiResponse" class="code-area">// Status va Javob JSON formatida...</pre>
+                <h3>🗄️ Cloud NoSQL Database Collections</h3>
+                <input type="text" id="newColName" class="form-control" placeholder="Yangi kolleksiya nomi...">
+                <button class="btn" onclick="createCollection()">Kolleksiya Qo'shish</button>
+                <pre id="dbCollectionsOutput" style="margin-top: 15px;">Yuklanmoqda...</pre>
             </div>
         </div>
 
-        <!-- 4. AI ENGINE PANEL -->
-        <div id="aiengine" class="panel">
+        <!-- TAB 6: CODE IDE & WORKSPACE -->
+        <div id="tab-ide" class="tab-content" style="display: none;">
             <div class="card">
-                <h2>🤖 Gemini Bot & Workflow Enterprise Engine</h2>
-                <div class="form-group">
-                    <label>Loyiha Nomi va Tavsifi (Prompt):</label>
-                    <input type="text" id="aiPrompt" placeholder="Masalan: Kino va seriallarni qidiruvchi Telegram Bot">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Architektura Turi:</label>
-                        <select id="aiType">
-                            <option value="telegram-bot">Telegram Bot (Telegraf.js / Express backend)</option>
-                            <option value="express-api">RESTful Microservice API</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="btn btn-purple" onclick="generateAiCode()">✨ KOD GENERATSIYA QILISH</button>
-            </div>
-            <div class="card">
-                <h2>💻 Yaratilgan Professional Kod:</h2>
-                <pre id="aiCodeResult" class="code-area">// Tayyor kod bu yerda namoyish etiladi...</pre>
+                <h3>💻 Code IDE & Cloud Workspace Repositories</h3>
+                <input type="text" id="newRepoName" class="form-control" placeholder="Repozitoriy nomi (masalan: my-bot-repo)">
+                <button class="btn" onclick="createRepository()">Repozitoriy Yaratish</button>
+                <pre id="reposOutput" style="margin-top: 15px;">Repozitoriyalar yuklanmoqda...</pre>
             </div>
         </div>
 
-        <!-- 5. DATABASE PANEL -->
-        <div id="database" class="panel">
+        <!-- TAB 7: SECRET KEY VAULT -->
+        <div id="tab-vault" class="tab-content" style="display: none;">
             <div class="card">
-                <h2>🗄️ Cloud NoSQL Distributed Database</h2>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Yangi Kolleksiya Nomi:</label>
-                        <input type="text" id="dbCollName" placeholder="masalan: users, bot_logs, products">
-                    </div>
-                    <div style="display:flex; align-items:flex-end;">
-                        <button class="btn" onclick="createCollection()">+ Kolleksiya Yaratish</button>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <h2>📂 Bazadagi Kolleksiyalar va Ma'lumotlar:</h2>
-                <div id="dbCollectionsContainer">Yuklanmoqda...</div>
+                <h3>🔒 Secret Key Vault (ENV Manager)</h3>
+                <input type="text" id="envKey" class="form-control" placeholder="Kalit Nomi (KEY): BOT_TOKEN">
+                <input type="text" id="envValue" class="form-control" placeholder="Qiymati (VALUE): 123456:ABC...">
+                <button class="btn" onclick="saveEnv()">Kalitni Saqlash & Shifrlash</button>
             </div>
         </div>
 
-        <!-- 6. REPOSITORIES PANEL -->
-        <div id="repos" class="panel">
+        <!-- TAB 8: INFRASTRUCTURE MONITOR -->
+        <div id="tab-monitors" class="tab-content" style="display: none;">
             <div class="card">
-                <h2>📦 Cloud Workspaces & Code Repositories</h2>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Yangi Ombor Nomi:</label>
-                        <input type="text" id="repoName" placeholder="my-telegram-bot">
-                    </div>
-                    <div style="display:flex; align-items:flex-end;">
-                        <button class="btn" onclick="createRepo()">+ Ombor Yaratish</button>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <h2>📁 Loyihalar Ro'yxati:</h2>
-                <div id="reposContainer">Yuklanmoqda...</div>
+                <h3>📈 Infrastructure Uptime Monitor</h3>
+                <input type="text" id="monName" class="form-control" placeholder="Servis nomi (masalan: Main Web)">
+                <input type="text" id="monUrl" class="form-control" placeholder="URL manzili (https://...)">
+                <button class="btn" onclick="addMonitor()">Monitor Qo'shish</button>
+                <pre id="monitorsOutput" style="margin-top: 15px;">Monitorlar yuklanmoqda...</pre>
             </div>
         </div>
 
-        <!-- 7. VAULT PANEL -->
-        <div id="vault" class="panel">
+        <!-- TAB 9: OAUTH TOKENS -->
+        <div id="tab-tokens" class="tab-content" style="display: none;">
             <div class="card">
-                <h2>🔐 Secret Vault (ENV Variables Manager)</h2>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>O'zgaruvchi Nomi (KEY):</label>
-                        <input type="text" id="envKey" placeholder="TELEGRAM_BOT_TOKEN">
-                    </div>
-                    <div class="form-group">
-                        <label>Qiymati (VALUE):</label>
-                        <input type="password" id="envVal" placeholder="123456789:AAHd...">
-                    </div>
-                </div>
-                <button class="btn" onclick="saveEnvSecret()">🔒 Saqlash</button>
-            </div>
-            <div class="card">
-                <h2>🔑 Saqlangan Maxfiy Kalitlar:</h2>
-                <div id="envSecretsContainer">Yuklanmoqda...</div>
+                <h3>🔑 OAuth Access Tokens Management</h3>
+                <input type="text" id="tokenLabel" class="form-control" placeholder="Token yorlig'i (masalan: Mobile App Key)">
+                <button class="btn" onclick="generateToken()">Token Generatsiya Qilish</button>
+                <pre id="tokensOutput" style="margin-top: 15px;">Tokenlar yuklanmoqda...</pre>
             </div>
         </div>
 
-        <!-- 8. UPTIME PANEL -->
-        <div id="uptime" class="panel">
+        <!-- TAB 10: AUDIT LOGS -->
+        <div id="tab-logs" class="tab-content" style="display: none;">
             <div class="card">
-                <h2>📡 Enterprise Uptime & Ping Monitor</h2>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Xizmat Nomi:</label>
-                        <input type="text" id="monName" placeholder="Render Bot Engine">
-                    </div>
-                    <div class="form-group">
-                        <label>Monitoring URL:</label>
-                        <input type="text" id="monUrl" placeholder="https://korviz.onrender.com">
-                    </div>
-                </div>
-                <button class="btn" onclick="addMonitor()">+ Kuzatuvga Qo'shish</button>
-            </div>
-            <div class="card">
-                <h2>🟢 Kuzatilayotgan Xizmatlar:</h2>
-                <div id="monitorsContainer">Yuklanmoqda...</div>
+                <h3>📜 System Audit Logs & Events</h3>
+                <pre id="fullAuditLogs" style="height: 300px; overflow-y: auto;">Loglar yuklanmoqda...</pre>
             </div>
         </div>
+    </main>
 
-        <!-- 9. TOKENS PANEL -->
-        <div id="tokens" class="panel">
-            <div class="card">
-                <h2>🔑 Access Tokens & API Keys</h2>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Token Maqsadi (Label):</label>
-                        <input type="text" id="tokenLabel" placeholder="Production Integration Key">
-                    </div>
-                    <div style="display:flex; align-items:flex-end;">
-                        <button class="btn" onclick="generateToken()">🔑 Token Generatsiya qilish</button>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <h2>📜 Faol API Tokenlar:</h2>
-                <div id="tokensContainer">Yuklanmoqda...</div>
-            </div>
-        </div>
-
-        <!-- 10. AUDIT LOGS PANEL -->
-        <div id="logs" class="panel">
-            <div class="card">
-                <h2>📑 Full Audit Log & System History</h2>
-                <button class="btn btn-purple" style="margin-bottom:12px;" onclick="refreshData()">🔄 Yangilash</button>
-                <div id="fullAuditLogs" class="code-area" style="min-height: 260px;">Yuklanmoqda...</div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- JAVASCRIPT ENGINE -->
     <script>
-        const tabTitles = {
-            dashboard: ["System Analytics", "Real-time enterprise server health and resource monitoring."],
-            sandbox: ["Multi-Lang Sandbox", "Isolated execution engine for JavaScript and Python."],
-            apistudio: ["Enterprise API Studio", "Test, mock, and debug RESTful APIs in real-time."],
-            aiengine: ["AI Bot Engine", "Build production-ready Telegram bots and APIs with Gemini."],
-            database: ["Cloud NoSQL DB", "High-speed JSON document database for cloud applications."],
-            repos: ["Workspace & IDE", "Manage repositories, files, and project structures."],
-            vault: ["Secret Key Vault", "Encrypted environment variables and security tokens."],
-            uptime: ["Infrastructure Monitor", "Automated 24/7 uptime monitoring and response tracking."],
-            tokens: ["Access Tokens", "Manage OAuth2 tokens, keys, and access levels."],
-            logs: ["Audit Trail & Logs", "Comprehensive historical record of all system events."]
-        };
-
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+        function switchTab(tabId, event) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             
-            document.getElementById(tabId).classList.add('active');
-            btn.classList.add('active');
-
-            if(tabTitles[tabId]) {
-                document.getElementById('activeTabTitle').innerText = tabTitles[tabId][0];
-                document.getElementById('activeTabDesc').innerText = tabTitles[tabId][1];
+            const targetTab = document.getElementById('tab-' + tabId);
+            if (targetTab) targetTab.style.display = 'block';
+            
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
             }
-        }
 
-        async function refreshData() {
-            try {
-                // Analytics
-                const analytics = await (await fetch('/api/analytics')).json();
-                document.getElementById('mServices').innerText = analytics.monitorsStatus || '0/0';
-                document.getElementById('mCollections').innerText = analytics.totalCollections || '0';
-                document.getElementById('mRequests').innerText = analytics.totalRepos ? (analytics.totalRepos * 42) + 120 : '142';
-                document.getElementById('mRam').innerText = analytics.ramUsage || '0 MB';
-
-                // Audit Logs
-                const logs = await (await fetch('/api/logs')).json();
-                const logHtml = logs.map(l => `[${new Date(l.date).toLocaleTimeString()}] [${l.type}] ${l.msg}`).join('\n');
-                document.getElementById('dashLogsList').innerText = logHtml || 'Loglar mavjud emas';
-                document.getElementById('fullAuditLogs').innerText = logHtml || 'Loglar mavjud emas';
-
-                // Repos
-                const repos = await (await fetch('/api/repos')).json();
-                document.getElementById('reposContainer').innerHTML = repos.map(r => `
-                    <div class="data-item">
-                        <div><b>${r.name}</b><br><small style="color:var(--text-sub);">${r.id}</small></div>
-                        <span class="status-badge" style="padding: 4px 10px;">Active</span>
-                    </div>
-                `).join('') || '<div style="color:var(--text-sub);">Omborlar yo\'q</div>';
-
-                // Database
-                const db = await (await fetch('/api/db/collections')).json();
-                let dbHtml = '';
-                for(let col in db) {
-                    dbHtml += `<div class="data-item">
-                        <div><b>Kolleksiya: ${col}</b><br><small style="color:var(--text-sub);">${db[col].length} ta element</small></div>
-                    </div>`;
-                }
-                document.getElementById('dbCollectionsContainer').innerHTML = dbHtml || '<div style="color:var(--text-sub);">Kolleksiyalar yo\'q</div>';
-
-                // Monitors
-                const monitors = await (await fetch('/api/monitors')).json();
-                document.getElementById('monitorsContainer').innerHTML = monitors.map(m => `
-                    <div class="data-item">
-                        <div><b>${m.name}</b><br><small style="color:var(--text-sub);">${m.url}</small></div>
-                        <span class="status-badge" style="padding: 4px 10px;">🟢 Online</span>
-                    </div>
-                `).join('') || '<div style="color:var(--text-sub);">Monitorlar yo\'q</div>';
-
-                // Env Secrets
-                const envs = await (await fetch('/api/env')).json();
-                document.getElementById('envSecretsContainer').innerHTML = envs.map(e => `
-                    <div class="data-item">
-                        <b>${e.key}</b>
-                        <code style="color:var(--neon-glow);">••••••••••••</code>
-                    </div>
-                `).join('') || '<div style="color:var(--text-sub);">Maxfiy kalitlar yo\'q</div>';
-
-                // Access Tokens
-                const tokens = await (await fetch('/api/tokens')).json();
-                document.getElementById('tokensContainer').innerHTML = tokens.map(t => `
-                    <div class="data-item">
-                        <div><b>${t.name}</b><br><code style="color:var(--neon-glow);">${t.id}</code></div>
-                    </div>
-                `).join('') || '<div style="color:var(--text-sub);">Tokenlar yo\'q</div>';
-
-            } catch (e) {
-                console.error("Data refresh error:", e);
-            }
+            const titles = {
+                'analytics': 'System Analytics',
+                'sandbox': 'Multi-Language Sandbox',
+                'api-studio': 'Enterprise API Studio',
+                'ai-engine': 'AI Bot & Workflow Engine',
+                'database': 'Cloud NoSQL Database',
+                'ide': 'Code IDE & Workspace',
+                'vault': 'Secret Key Vault',
+                'monitors': 'Infrastructure Monitor',
+                'tokens': 'OAuth Tokens & Access',
+                'logs': 'Audit Logs & Events'
+            };
+            document.getElementById('page-title').innerText = titles[tabId] || 'Dashboard';
+            
+            if(tabId === 'database') loadCollections();
+            if(tabId === 'ide') loadRepos();
+            if(tabId === 'monitors') loadMonitors();
+            if(tabId === 'tokens') loadTokens();
+            if(tabId === 'logs') loadLogs();
         }
 
         async function executeSandbox() {
             const code = document.getElementById('sandboxCode').value;
             const lang = document.getElementById('sandboxLang').value;
-            const res = await (await fetch('/api/sandbox/execute', {
+            const res = await fetch('/api/sandbox/execute', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code, lang })
-            })).json();
-            document.getElementById('sandboxOutput').innerText = res.logs || 'Bajarildi.';
-            refreshData();
+            });
+            const data = await res.json();
+            document.getElementById('sandboxOutput').innerText = data.logs;
         }
 
-        async function sendApiRequest() {
+        async function sendApiStudioRequest() {
             const url = document.getElementById('apiUrl').value;
             const method = document.getElementById('apiMethod').value;
-            const body = document.getElementById('apiBody').value;
-            const res = await (await fetch('/api/tools/http-request', {
+            const res = await fetch('/api/tools/http-request', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ url, method, body })
-            })).json();
-            document.getElementById('apiResponse').innerText = JSON.stringify(res, null, 2);
-            refreshData();
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url, method })
+            });
+            const data = await res.json();
+            document.getElementById('apiStudioOutput').innerText = JSON.stringify(data, null, 2);
         }
 
-        async function generateAiCode() {
+        async function deployLiveBot() {
+            const token = document.getElementById('liveBotToken').value;
+            const botName = document.getElementById('liveBotName').value;
+            if(!token) {
+                alert('Iltimos, bot tokenini kiriting!');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/bots/deploy-live', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, botName })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert('✅ ' + data.message);
+                } else {
+                    alert('❌ Xatolik: ' + data.error);
+                }
+            } catch(err) {
+                alert('Tarmoq xatoligi: ' + err.message);
+            }
+        }
+
+        async function generateAICode() {
             const prompt = document.getElementById('aiPrompt').value;
-            const targetType = document.getElementById('aiType').value;
-            const res = await (await fetch('/api/ai/generate', {
+            if(!prompt) return alert('Prompt yozing!');
+            
+            const res = await fetch('/api/ai/generate', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ prompt, targetType })
-            })).json();
-            document.getElementById('aiCodeResult').innerText = res.code || '// Kod generatsiya qilindi.';
-            refreshData();
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt, targetType: 'telegram-bot' })
+            });
+            const data = await res.json();
+            document.getElementById('aiCodeResult').innerText = data.code;
+        }
+
+        async function loadCollections() {
+            const res = await fetch('/api/db/collections');
+            const data = await res.json();
+            document.getElementById('dbCollectionsOutput').innerText = JSON.stringify(data, null, 2);
         }
 
         async function createCollection() {
-            const name = document.getElementById('dbCollName').value;
-            if(!name) return;
-            await fetch('/api/db/collection/create', {
+            const collectionName = document.getElementById('newColName').value;
+            if(!collectionName) return alert('Kolleksiya nomini kiriting!');
+            const res = await fetch('/api/db/collection/create', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ collectionName: name })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ collectionName })
             });
-            document.getElementById('dbCollName').value = '';
-            refreshData();
+            const data = await res.json();
+            loadCollections();
+            alert('Kolleksiya muvaffaqiyatli yaratildi!');
         }
 
-        async function createRepo() {
-            const name = document.getElementById('repoName').value;
-            if(!name) return;
-            await fetch('/api/repos/create', {
+        async function loadRepos() {
+            const res = await fetch('/api/repos');
+            const data = await res.json();
+            document.getElementById('reposOutput').innerText = JSON.stringify(data, null, 2);
+        }
+
+        async function createRepository() {
+            const name = document.getElementById('newRepoName').value;
+            if(!name) return alert('Repozitoriy nomini kiriting!');
+            const res = await fetch('/api/repos/create', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name })
             });
-            document.getElementById('repoName').value = '';
-            refreshData();
+            loadRepos();
+            alert('Repozitoriy ochildi!');
         }
 
-        async function saveEnvSecret() {
+        async function saveEnv() {
             const key = document.getElementById('envKey').value;
-            const value = document.getElementById('envVal').value;
-            if(!key) return;
-            await fetch('/api/env/create', {
+            const value = document.getElementById('envValue').value;
+            if(!key || !value) return alert('Kalit va qiymatni kiriting!');
+
+            const res = await fetch('/api/env/create', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key, value })
             });
-            document.getElementById('envKey').value = '';
-            document.getElementById('envVal').value = '';
-            refreshData();
+            const data = await res.json();
+            alert(data.message || data.error);
+        }
+
+        async function loadMonitors() {
+            const res = await fetch('/api/monitors');
+            const data = await res.json();
+            document.getElementById('monitorsOutput').innerText = JSON.stringify(data, null, 2);
         }
 
         async function addMonitor() {
             const name = document.getElementById('monName').value;
             const url = document.getElementById('monUrl').value;
-            if(!name || !url) return;
+            if(!name || !url) return alert('Barcha maydonlarni to\'ldiring!');
             await fetch('/api/monitors/add', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, url })
             });
-            document.getElementById('monName').value = '';
-            document.getElementById('monUrl').value = '';
-            refreshData();
+            loadMonitors();
+            alert('Monitor qo\'shildi!');
+        }
+
+        async function loadTokens() {
+            const res = await fetch('/api/tokens');
+            const data = await res.json();
+            document.getElementById('tokensOutput').innerText = JSON.stringify(data, null, 2);
         }
 
         async function generateToken() {
             const name = document.getElementById('tokenLabel').value;
-            if(!name) return;
+            if(!name) return alert('Token yorlig\'ini kiriting!');
             await fetch('/api/tokens/create', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name })
             });
-            document.getElementById('tokenLabel').value = '';
-            refreshData();
+            loadTokens();
+            alert('Token yaratildi!');
         }
 
-        // Auto Refresh
-        refreshData();
-        setInterval(refreshData, 12000);
+        async function loadLogs() {
+            const res = await fetch('/api/logs');
+            const data = await res.json();
+            let logsText = data.map(l => `[${new Date(l.date).toLocaleTimeString()}] [${l.type}] ${l.msg}`).join('\n');
+            document.getElementById('fullAuditLogs').innerText = logsText;
+        }
+
+        // Periodic stats update
+        setInterval(async () => {
+            try {
+                const res = await fetch('/api/analytics');
+                const data = await res.json();
+                document.getElementById('st-services').innerText = data.activeServices;
+                document.getElementById('st-cols').innerText = data.totalCollections;
+                document.getElementById('st-ram').innerText = data.ramUsage;
+            } catch (e) {}
+        }, 5000);
     </script>
 </body>
 </html>
