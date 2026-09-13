@@ -2,39 +2,40 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>KORVIZ Engine 5.0 Platform</title>
+    <title>KORVIZ Platform 6.0 Ultra</title>
     <style>
         :root { --bg-primary: #090d16; --bg-secondary: #111726; --accent: #0284c7; --text-main: #f8fafc; --text-sub: #94a3b8; --border: #1e293b; }
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { margin: 0; background: var(--bg-primary); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
         /* SIDEBAR */
-        .sidebar { width: 260px; background: var(--bg-secondary); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
-        .brand { font-size: 20px; font-weight: 800; color: #38bdf8; letter-spacing: 1.5px; margin-bottom: 30px; display: flex; align-items: center; gap: 8px; }
-        .menu-btn { background: transparent; border: none; color: var(--text-sub); width: 100%; text-align: left; padding: 12px; margin-bottom: 6px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .sidebar { width: 270px; background: var(--bg-secondary); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .brand { font-size: 20px; font-weight: 800; color: #38bdf8; letter-spacing: 1.5px; margin-bottom: 25px; display: flex; align-items: center; gap: 8px; }
+        .menu-btn { background: transparent; border: none; color: var(--text-sub); width: 100%; text-align: left; padding: 12px 14px; margin-bottom: 4px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
         .menu-btn:hover { background: #1e293b; color: var(--text-main); }
         .menu-btn.active { background: var(--accent); color: #fff; }
 
         /* MAIN CONTENT */
-        .main { flex: 1; padding: 30px; overflow-y: auto; }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+        .main { flex: 1; padding: 28px; overflow-y: auto; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
         
-        /* ANALYTICS STATS */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        /* STATS GRID */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
         .stat-card { background: var(--bg-secondary); border: 1px solid var(--border); padding: 16px; border-radius: 10px; }
-        .stat-num { font-size: 22px; font-weight: bold; color: #38bdf8; margin-top: 4px; }
+        .stat-num { font-size: 20px; font-weight: bold; color: #38bdf8; margin-top: 4px; }
 
         /* PANELS */
         .panel { display: none; }
         .panel.active { display: block; }
         .card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
 
-        input, textarea, select { width: 100%; padding: 10px; margin: 8px 0 16px 0; background: #030712; border: 1px solid #374151; color: #fff; border-radius: 6px; outline: none; }
-        button.btn-action { background: var(--accent); color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        input, textarea, select { width: 100%; padding: 10px; margin: 6px 0 14px 0; background: #030712; border: 1px solid #374151; color: #fff; border-radius: 6px; outline: none; font-size: 13px; }
+        button.btn-action { background: var(--accent); color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
         button.btn-action:hover { background: #0369a1; }
 
         .list-item { background: #182234; border: 1px solid var(--border); padding: 12px 16px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .code-box { background: #030712; padding: 12px; border-radius: 6px; font-family: monospace; font-size: 13px; color: #38bdf8; overflow-x: auto; }
+        .code-editor { background: #030712; color: #38bdf8; font-family: monospace; font-size: 13px; min-height: 140px; border: 1px solid #374151; padding: 12px; border-radius: 6px; }
+        .badge { font-size: 11px; padding: 3px 8px; border-radius: 12px; background: #065f46; color: #34d399; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -42,78 +43,106 @@
     <!-- SIDEBAR NAVIGATION -->
     <div class="sidebar">
         <div>
-            <div class="brand">⚡ KORVIZ PLATFORM</div>
-            <button class="menu-btn active" onclick="switchView('dashboardView', this)">📊 Dashboard</button>
-            <button class="menu-btn" onclick="switchView('reposView', this)">📦 Repozitoriyalar</button>
-            <button class="menu-btn" onclick="switchView('aiView', this)">🤖 AI Assistent</button>
+            <div class="brand">⚡ KORVIZ ENGINE</div>
+            <button class="menu-btn active" onclick="switchView('dashboardView', this)">📊 Boshqaruv Paneli</button>
+            <button class="menu-btn" onclick="switchView('reposView', this)">📦 Ombor va Kod IDE</button>
+            <button class="menu-btn" onclick="switchView('apiTesterView', this)">🌐 API Tester (Postman)</button>
+            <button class="menu-btn" onclick="switchView('envView', this)">🔐 ENV O'zgaruvchilar</button>
             <button class="menu-btn" onclick="switchView('cicdView', this)">🔄 CI/CD Pipelines</button>
-            <button class="menu-btn" onclick="switchView('hostingView', this)">🚀 Bulutli Host</button>
-            <button class="menu-btn" onclick="switchView('settingsView', this)">🔑 Access Tokens</button>
+            <button class="menu-btn" onclick="switchView('hostingView', this)">🚀 Bulutli Host (24/7)</button>
+            <button class="menu-btn" onclick="switchView('tokensView', this)">🔑 Access Tokens</button>
         </div>
-        <div style="font-size: 11px; color: var(--text-sub);">KORVIZ Cloud System v5.0</div>
+        <div style="font-size: 11px; color: var(--text-sub);">KORVIZ Enterprise Engine v6.0</div>
     </div>
 
-    <!-- MAIN CONTENT AREA -->
+    <!-- MAIN AREA -->
     <div class="main">
         <div class="header-bar">
-            <h2 id="viewTitle" style="margin:0;">Dashboard Overview</h2>
-            <span style="font-size:12px; background:#065f46; color:#34d399; padding:4px 10px; border-radius:20px; font-weight:bold;">● ONLINE</span>
+            <h2 id="viewTitle" style="margin:0;">Boshqaruv Paneli</h2>
+            <span class="badge">● OPERATIONAL</span>
         </div>
 
         <!-- STATS BAR -->
         <div class="stats-grid">
             <div class="stat-card"><small style="color:var(--text-sub)">Repozitoriyalar</small><div class="stat-num" id="statRepos">0</div></div>
-            <div class="stat-card"><small style="color:var(--text-sub)">Ochiq Issues</small><div class="stat-num" id="statIssues">0</div></div>
-            <div class="stat-card"><small style="color:var(--text-sub)">Faol Serverlar</small><div class="stat-num" id="statDeploys">0</div></div>
-            <div class="stat-card"><small style="color:var(--text-sub)">Tizim Holati</small><div class="stat-num" style="font-size:14px; color:#34d399;" id="statStatus">OPERATIONAL</div></div>
+            <div class="stat-card"><small style="color:var(--text-sub)">ENV Kalitlar</small><div class="stat-num" id="statEnv">0</div></div>
+            <div class="stat-card"><small style="color:var(--text-sub)">Server RAM</small><div class="stat-num" style="color:#34d399;" id="statRam">0 MB</div></div>
+            <div class="stat-card"><small style="color:var(--text-sub)">CPU Yuklama</small><div class="stat-num" style="color:#fbbf24;" id="statCpu">0%</div></div>
         </div>
 
         <!-- 1. DASHBOARD VIEW -->
         <div id="dashboardView" class="panel active">
             <div class="card">
-                <h3>Tizim Haqida</h3>
-                <p style="color:var(--text-sub); font-size:14px;">KORVIZ Platformasi bulutli servislar, repozitoriyalar va avtomatik deploy zanjirlarini yagona interfeysda boshqarish imkoniyatini beradi.</p>
+                <h3>KORVIZ Platformasi Haqida</h3>
+                <p style="color:var(--text-sub); font-size:13px;">Barcha repozitoriyalar, bulutli xizmatlar, ENV xavfsizlik omborlari va CI/CD zanjirlarini yagona markazlashtirilgan interfeysdan samarali boshqaring.</p>
             </div>
             <div class="card">
-                <h3>Oxirgi Loglar</h3>
+                <h3>Tizimning Jonli Loglari:</h3>
                 <div id="dashLogs">Yuklanmoqda...</div>
             </div>
         </div>
 
-        <!-- 2. REPOSITORIES VIEW -->
+        <!-- 2. REPOSITORIES & ONLINE EDITOR -->
         <div id="reposView" class="panel">
             <div class="card">
                 <h3>Yangi Repozitoriya Yaratish</h3>
                 <input type="text" id="repoName" placeholder="Loyiha nomi...">
                 <input type="text" id="repoDesc" placeholder="Loyiha tavsifi...">
+                <select id="repoTemplate">
+                    <option value="standard">Standard Node.js Loyiha</option>
+                    <option value="telegram-bot">Telegram Bot Shablon</option>
+                </select>
                 <button class="btn-action" onclick="createRepo()">Yaratish</button>
             </div>
             <div class="card">
-                <h3>Mavjud Omborlar:</h3>
+                <h3>Omborlar va Fayllarni Tahrirlash:</h3>
                 <div id="repoList">Yuklanmoqda...</div>
             </div>
+            <div class="card" id="editorCard" style="display:none;">
+                <h3 id="editingRepoTitle">Faylni Tahrirlash</h3>
+                <input type="text" id="editFileName" placeholder="Fayl nomi (masalan: index.js)">
+                <textarea id="editFileContent" class="code-editor" rows="8"></textarea>
+                <button class="btn-action" style="background:#10b981;" onclick="saveFileContent()">Faylni Saqlash (Commit)</button>
+            </div>
         </div>
 
-        <!-- 3. AI ASSISTANT VIEW -->
-        <div id="aiView" class="panel">
+        <!-- 3. API TESTER (POSTMAN) -->
+        <div id="apiTesterView" class="panel">
             <div class="card">
-                <h3>🤖 KORVIZ AI Code Reviewer</h3>
-                <p style="color:var(--text-sub); font-size:13px;">Kodingizni tahlil qilish va potensial xatoliklarni aniqlash uchun kodingizni kiriting:</p>
-                <textarea id="aiCodeInput" rows="6" placeholder="// Bu yerga kodingizni joylang..."></textarea>
-                <button class="btn-action" onclick="runAiAnalysis()">Tahlil Qilish</button>
+                <h3>🌐 API Request Tester</h3>
+                <select id="apiMethod">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                </select>
+                <input type="text" id="apiUrl" placeholder="https://api.example.com/data">
+                <button class="btn-action" onclick="sendApiRequest()">So'rov Yuborish</button>
             </div>
-            <div class="card" id="aiResultBox" style="display:none;">
-                <h3>Tahlil Natijasi:</h3>
-                <div class="code-box" id="aiResultText"></div>
+            <div class="card">
+                <h3>Natija:</h3>
+                <pre class="code-editor" id="apiResponseText">// Javob shu yerda ko'rinadi...</pre>
             </div>
         </div>
 
-        <!-- 4. CI/CD PIPELINES VIEW -->
+        <!-- 4. ENV VAULT -->
+        <div id="envView" class="panel">
+            <div class="card">
+                <h3>🔐 ENV O'zgaruvchisini Saqlash</h3>
+                <input type="text" id="envKey" placeholder="KEY (masalan: BOT_TOKEN)">
+                <input type="text" id="envValue" placeholder="VALUE (masalan: 123456:ABC...)">
+                <input type="text" id="envService" placeholder="Qaysi xizmat uchun (masalan: Bot-Service)">
+                <button class="btn-action" onclick="createEnv()">Saqlash</button>
+            </div>
+            <div class="card">
+                <h3>Saqlangan Kalitlar:</h3>
+                <div id="envList">Yuklanmoqda...</div>
+            </div>
+        </div>
+
+        <!-- 5. CI/CD PIPELINES -->
         <div id="cicdView" class="panel">
             <div class="card">
-                <h3>🔄 CI/CD Avtomatlashtirish Pipeline</h3>
-                <p style="color:var(--text-sub); font-size:13px;">Proyektlar uchun avtomatik Build va Test bosqichlarini ishga tushirish.</p>
-                <button class="btn-action" onclick="triggerPipeline()">Yangi Pipeline Trigger Qilish</button>
+                <h3>🔄 CI/CD Automation Pipeline</h3>
+                <button class="btn-action" onclick="triggerPipeline()">Pipeline-ni Ishga Tushirish</button>
             </div>
             <div class="card">
                 <h3>Pipeline Tarixi:</h3>
@@ -121,13 +150,13 @@
             </div>
         </div>
 
-        <!-- 5. BULUTLI HOST VIEW -->
+        <!-- 6. BULUTLI HOST -->
         <div id="hostingView" class="panel">
             <div class="card">
                 <h3>🚀 Serverda Ishga Tushirish</h3>
                 <input type="text" id="serviceName" placeholder="Servis nomi...">
                 <input type="text" id="runCmd" placeholder="Start Command (node index.js)">
-                <button class="btn-action" onclick="deployApp()">Deploy</button>
+                <button class="btn-action" onclick="deployApp()">24/7 Deploy</button>
             </div>
             <div class="card">
                 <h3>Faol Servislar:</h3>
@@ -135,15 +164,15 @@
             </div>
         </div>
 
-        <!-- 6. ACCESS TOKENS VIEW -->
-        <div id="settingsView" class="panel">
+        <!-- 7. ACCESS TOKENS -->
+        <div id="tokensView" class="panel">
             <div class="card">
-                <h3>🔑 Personal Access Tokens (PAT)</h3>
+                <h3>🔑 Access Tokens (PAT)</h3>
                 <input type="text" id="tokenName" placeholder="Token maqsadi...">
-                <button class="btn-action" onclick="createToken()">Token Generatsiya Qilish</button>
+                <button class="btn-action" onclick="createToken()">Token Yaratish</button>
             </div>
             <div class="card">
-                <h3>Faol Tokenlar:</h3>
+                <h3>Tokenlar:</h3>
                 <div id="tokenList">Yuklanmoqda...</div>
             </div>
         </div>
@@ -151,68 +180,114 @@
     </div>
 
     <script>
+        let selectedRepoId = null;
+
         function switchView(viewId, btn) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
             
             document.getElementById(viewId).classList.add('active');
             btn.classList.add('active');
-            document.getElementById('viewTitle').innerText = btn.innerText.trim();
+            document.getElementById('viewTitle').innerText = btn.innerText.replace(/^[^\s]+\s/, '');
         }
 
         async function loadData() {
             const analytics = await (await fetch('/api/analytics')).json();
             document.getElementById('statRepos').innerText = analytics.totalRepos;
-            document.getElementById('statIssues').innerText = analytics.totalIssues;
-            document.getElementById('statDeploys').innerText = analytics.totalDeploys;
+            document.getElementById('statEnv').innerText = analytics.totalEnvVars;
+            document.getElementById('statRam').innerText = analytics.ramUsage;
+            document.getElementById('statCpu').innerText = analytics.cpuLoad;
 
             // Repos
             const repos = await (await fetch('/api/repos')).json();
             document.getElementById('repoList').innerHTML = repos.map(r => 
                 `<div class="list-item">
-                    <div><b>${r.name}</b> <small style="color:#64748b;">(${r.id})</small><br><small style="color:#94a3b8">${r.description}</small></div>
+                    <div>
+                        <b>${r.name}</b> <small style="color:#64748b;">(${r.id})</small><br>
+                        <small style="color:#94a3b8">${r.description}</small>
+                    </div>
+                    <button class="btn-action" style="padding:6px 12px; background:#334155;" onclick="openEditor('${r.id}', '${r.name}')">Fayllar / Editor</button>
                  </div>`
             ).join('') || 'Omborlar yo\'q';
+
+            // ENV
+            const envs = await (await fetch('/api/env')).json();
+            document.getElementById('envList').innerHTML = envs.map(e => 
+                `<div class="list-item"><div><b>${e.key}</b> = <code>******</code> <small style="color:#64748b;">(${e.service})</small></div></div>`
+            ).join('') || 'ENV kalitlar yo\'q';
 
             // Logs
             const logs = await (await fetch('/api/logs')).json();
             document.getElementById('dashLogs').innerHTML = logs.map(l => 
                 `<div style="font-family:monospace; font-size:12px; color:#94a3b8; padding:4px 0;">[${new Date(l.date).toLocaleTimeString()}] <b>${l.type}</b>: ${l.msg}</div>`
-            ).join('') || 'Loglar mavjud emas';
+            ).join('') || 'Loglar yo\'q';
 
             // Deployments
             const deploys = await (await fetch('/api/deployments')).json();
             document.getElementById('deployList').innerHTML = deploys.map(d => 
-                `<div class="list-item"><div><b>${d.name}</b> (${d.status})<br><small style="color:#94a3b8">Cmd: ${d.command}</small></div></div>`
+                `<div class="list-item"><div><b>${d.name}</b> <span class="badge">${d.status}</span><br><small style="color:#94a3b8">Port: ${d.port || 10000} | Cmd: ${d.command}</small></div></div>`
             ).join('') || 'Servislar yo\'q';
 
             // Pipelines
             const pipelines = await (await fetch('/api/pipelines')).json();
             document.getElementById('pipelineList').innerHTML = pipelines.map(p => 
-                `<div class="list-item"><div><b>${p.id}</b> — Steps: ${p.steps.join(' -> ')} <span style="color:#34d399;">[${p.status}]</span></div></div>`
+                `<div class="list-item"><div><b>${p.id}</b> — ${p.steps.join(' ➔ ')} <span class="badge">${p.status}</span></div></div>`
             ).join('') || 'Pipelinelar yo\'q';
 
             // Tokens
             const tokens = await (await fetch('/api/tokens')).json();
             document.getElementById('tokenList').innerHTML = tokens.map(t => 
                 `<div class="list-item"><div><b>${t.name}</b><br><code style="color:#38bdf8">${t.id}</code></div></div>`
-            ).join('') || 'Tokenlar mavjud emas';
+            ).join('') || 'Tokenlar yo\'q';
+        }
+
+        function openEditor(repoId, repoName) {
+            selectedRepoId = repoId;
+            document.getElementById('editorCard').style.display = 'block';
+            document.getElementById('editingRepoTitle').innerText = `Faylni Tahrirlash: ${repoName}`;
+            document.getElementById('editFileName').value = 'index.js';
+        }
+
+        async function saveFileContent() {
+            if(!selectedRepoId) return alert("Repozitoriya tanlanmagan!");
+            const fileName = document.getElementById('editFileName').value;
+            const content = document.getElementById('editFileContent').value;
+
+            await fetch(`/api/repos/${selectedRepoId}/file/save`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ fileName, content })
+            });
+
+            alert("Fayl muvaffaqiyatli saqlandi!");
+            loadData();
         }
 
         async function createRepo() {
             const name = document.getElementById('repoName').value;
             const description = document.getElementById('repoDesc').value;
+            const template = document.getElementById('repoTemplate').value;
             if(!name) return alert("Nom yozing!");
-            await fetch('/api/repos/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name, description }) });
+            await fetch('/api/repos/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name, description, template }) });
             loadData();
         }
 
-        async function runAiAnalysis() {
-            const code = document.getElementById('aiCodeInput').value;
-            if(!code) return alert("Kod yozing!");
-            const res = await (await fetch('/api/ai/analyze', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ code }) })).json();
-            document.getElementById('aiResultBox').style.display = 'block';
-            document.getElementById('aiResultText').innerText = JSON.stringify(res, null, 2);
+        async function sendApiRequest() {
+            const url = document.getElementById('apiUrl').value;
+            const method = document.getElementById('apiMethod').value;
+            if(!url) return alert("URL kiriting!");
+
+            const res = await (await fetch('/api/tools/proxy-request', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ url, method }) })).json();
+            document.getElementById('apiResponseText').innerText = JSON.stringify(res, null, 2);
+        }
+
+        async function createEnv() {
+            const key = document.getElementById('envKey').value;
+            const value = document.getElementById('envValue').value;
+            const service = document.getElementById('envService').value;
+            if(!key || !value) return alert("Maydonlarni to'ldiring!");
+            await fetch('/api/env/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ key, value, service }) });
+            loadData();
         }
 
         async function triggerPipeline() {
