@@ -2,52 +2,64 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>KORVIZ Engine</title>
+    <title>KORVIZ Platform v2.0</title>
     <style>
         body { background-color: #0b0f19; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 24px; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 20px; }
         .logo { font-size: 26px; font-weight: 800; color: #38bdf8; letter-spacing: 2px; }
-        .subtitle { font-size: 14px; color: #64748b; }
+        .subtitle { font-size: 13px; color: #64748b; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
         .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; }
-        h2 { color: #f8fafc; margin-top: 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #030712; border: 1px solid #374151; color: #fff; border-radius: 8px; box-sizing: border-box; outline: none; }
+        h2 { color: #f8fafc; margin-top: 0; font-size: 18px; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #030712; border: 1px solid #374151; color: #fff; border-radius: 8px; box-sizing: border-box; outline: none; }
         input:focus, textarea:focus { border-color: #38bdf8; }
-        button { background: #0284c7; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 8px; transition: 0.2s; }
+        button { background: #0284c7; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 8px; }
         button:hover { background: #0369a1; }
         .repo-item { background: #1f2937; padding: 12px 16px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #38bdf8; }
-        .status-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #065f46; color: #34d399; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; background: #065f46; color: #34d399; }
+        .editor-box { background: #030712; border: 1px solid #374151; border-radius: 8px; padding: 12px; font-family: monospace; }
+        .log-item { font-family: monospace; font-size: 12px; color: #94a3b8; padding: 4px 0; border-bottom: 1px solid #1f2937; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div>
-            <div class="logo">⚡ KORVIZ PLATFORM</div>
-            <div class="subtitle">Cloud Infrastructure & Automated Hosting Engine</div>
+            <div class="logo">⚡ KORVIZ PLATFORM 2.0</div>
+            <div class="subtitle">Cloud Source Engine & Hosting Platform</div>
         </div>
     </div>
 
     <div class="grid">
+        <!-- 1. REPO ENGINE -->
         <div class="card">
-            <h2>📦 Kod Ombori (Repositories)</h2>
-            <input type="text" id="repoName" placeholder="Loyiha nomi...">
-            <textarea id="repoDesc" placeholder="Loyiha tavsifi va xususiyatlari..."></textarea>
-            <button onclick="createRepo()">KORVIZ Omboriga Saqlash</button>
+            <h2>📦 Kod Ombori (Create Repository)</h2>
+            <input type="text" id="repoName" placeholder="Loyiha nomi (masalan: my-fast-api)">
+            <textarea id="repoDesc" placeholder="Loyiha tavsifi..."></textarea>
+            <textarea id="repoCode" rows="4" placeholder="// Boshlang'ich kodingizni yozing..."></textarea>
+            <button onclick="createRepo()">Omborga Saqlash</button>
 
-            <h3 style="font-size:15px; margin-top:24px; color:#94a3b8;">Mavjud Loyihalar:</h3>
+            <h3 style="font-size:15px; margin-top:24px; color:#94a3b8;">Saqlangan Repozitoriyalar:</h3>
             <div id="repoList">Yuklanmoqda...</div>
         </div>
 
+        <!-- 2. CLOUD HOSTING -->
         <div class="card">
-            <h2>🚀 Bulutli Host (Cloud Server)</h2>
-            <input type="text" id="deployName" placeholder="Servis nomi (masalan: my-bot)">
-            <input type="text" id="gitUrl" placeholder="Git Repository URL">
-            <button onclick="deployApp()" style="background: #10b981;">Serverda Ishga Tushirish</button>
+            <h2>🚀 Bulutli Host (Deploy Service)</h2>
+            <input type="text" id="serviceName" placeholder="Servis nomi (masalan: telegram-bot-service)">
+            <input type="text" id="runCmd" placeholder="Start Command (masalan: node index.js)">
+            <textarea id="envVars" placeholder='ENV o'zgaruvchilar (JSON formatida): {"BOT_TOKEN": "12345"}'></textarea>
+            <button onclick="deployApp()" style="background: #10b981;">KORVIZ Serverida Yurgizish</button>
 
-            <h3 style="font-size:15px; margin-top:24px; color:#94a3b8;">Faol Serverlar:</h3>
+            <h3 style="font-size:15px; margin-top:24px; color:#94a3b8;">Faol Serverlar (24/7):</h3>
             <div id="deployList">Yuklanmoqda...</div>
         </div>
+    </div>
+
+    <!-- 3. LOGS & ACTIVITY -->
+    <div class="card" style="margin-top:24px;">
+        <h2>📋 Tizim Jurnali va Jonli Loglar (Live System Logs)</h2>
+        <div id="logList">Loglar yuklanmoqda...</div>
     </div>
 
     <script>
@@ -56,51 +68,73 @@
                 const repoRes = await fetch('/api/repos');
                 const repos = await repoRes.json();
                 document.getElementById('repoList').innerHTML = repos.map(r => 
-                    `<div class="repo-item"><b>${r.name}</b><br><small style="color:#94a3b8">${r.description}</small></div>`
-                ).join('') || '<div style="color:#64748b; font-size:14px;">Hozircha saqlangan loyiha yo\'q</div>';
+                    `<div class="repo-item">
+                        <b>${r.name}</b> <span style="font-size:12px; color:#64748b;">(Branch: ${r.branch} | Commits: ${r.commitsCount || 1})</span><br>
+                        <small style="color:#94a3b8">${r.description}</small>
+                     </div>`
+                ).join('') || '<div style="color:#64748b;">Mavjud omborlar yo\'q</div>';
 
                 const deployRes = await fetch('/api/deployments');
                 const deploys = await deployRes.json();
-                document.getElementById('deployList').innerHTML = Object.keys(deploys).map(k => 
+                document.getElementById('deployList').innerHTML = deploys.map(d => 
                     `<div class="repo-item" style="border-color:#10b981">
-                        <b>${k}</b> <span class="status-badge">${deploys[k].status}</span>
-                        <div style="font-size:12px; color:#94a3b8; margin-top:4px;">URL: ${deploys[k].gitUrl}</div>
+                        <b>${d.name}</b> <span class="badge">${d.status}</span>
+                        <div style="font-size:12px; color:#94a3b8; margin-top:4px;">Command: <code>${d.command}</code> | RAM: ${d.ramUsage}</div>
                      </div>`
-                ).join('') || '<div style="color:#64748b; font-size:14px;">Hozircha faol serverlar yo\'q</div>';
+                ).join('') || '<div style="color:#64748b;">Faol serverlar yo\'q</div>';
+
+                const logRes = await fetch('/api/logs');
+                const logs = await logRes.json();
+                document.getElementById('logList').innerHTML = logs.map(l => 
+                    `<div class="log-item">[${new Date(l.date).toLocaleTimeString()}] <b>${l.type}</b>: ${l.msg}</div>`
+                ).join('') || '<div style="color:#64748b;">Loglar mavjud emas</div>';
+
             } catch (e) {
-                console.error("Xatolik:", e);
+                console.error("Yuklashda xatolik:", e);
             }
         }
 
         async function createRepo() {
             const name = document.getElementById('repoName').value;
             const description = document.getElementById('repoDesc').value;
-            if(!name) return alert("Nomini kiriting!");
+            const initialCode = document.getElementById('repoCode').value;
+            if(!name) return alert("Loyiha nomini kiriting!");
+
             await fetch('/api/repos/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, description })
+                body: JSON.stringify({ name, description, initialCode })
             });
+
             document.getElementById('repoName').value = '';
             document.getElementById('repoDesc').value = '';
+            document.getElementById('repoCode').value = '';
             loadData();
         }
 
         async function deployApp() {
-            const name = document.getElementById('deployName').value;
-            const gitUrl = document.getElementById('gitUrl').value;
-            if(!gitUrl) return alert("Git URL kiriting!");
+            const serviceName = document.getElementById('serviceName').value;
+            const runCommand = document.getElementById('runCmd').value;
+            const envVarsRaw = document.getElementById('envVars').value;
+            if(!serviceName) return alert("Servis nomini kiriting!");
+
+            let envVars = {};
+            try { if(envVarsRaw) envVars = JSON.parse(envVarsRaw); } catch(e) { return alert("ENV formati xato (JSON kiriting)"); }
+
             await fetch('/api/deploy', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, gitUrl })
+                body: JSON.stringify({ serviceName, runCommand, envVars })
             });
-            document.getElementById('deployName').value = '';
-            document.getElementById('gitUrl').value = '';
+
+            document.getElementById('serviceName').value = '';
+            document.getElementById('runCmd').value = '';
+            document.getElementById('envVars').value = '';
             loadData();
         }
 
         loadData();
+        setInterval(loadData, 5000); // 5 soniyada avto-yangilash
     </script>
 </body>
 </html>
