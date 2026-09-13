@@ -2,214 +2,239 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>KORVIZ Platform 3.0</title>
+    <title>KORVIZ Enterprise v4.0</title>
     <style>
         body { background-color: #0b0f19; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 24px; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 16px; margin-bottom: 20px; }
-        .logo { font-size: 24px; font-weight: 800; color: #38bdf8; letter-spacing: 2px; }
+        .logo { font-size: 26px; font-weight: 800; color: #38bdf8; letter-spacing: 2px; }
         
-        /* NAVIGATION TABS */
-        .nav-tabs { display: flex; gap: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 24px; }
-        .tab-btn { background: #111827; color: #94a3b8; border: 1px solid #1f2937; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; }
+        /* TUGMALAR NAVIGATSIYASI (TABS) */
+        .nav-tabs { display: flex; gap: 8px; border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 24px; overflow-x: auto; }
+        .tab-btn { background: #111827; color: #94a3b8; border: 1px solid #1f2937; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap; }
         .tab-btn:hover { background: #1f2937; color: #fff; }
         .tab-btn.active { background: #0284c7; color: #fff; border-color: #38bdf8; }
 
-        /* TAB CONTENTS */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
         .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
         h2 { color: #f8fafc; margin-top: 0; font-size: 18px; }
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #030712; border: 1px solid #374151; color: #fff; border-radius: 8px; box-sizing: border-box; outline: none; }
-        input:focus, textarea:focus { border-color: #38bdf8; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #030712; border: 1px solid #374151; color: #fff; border-radius: 8px; box-sizing: border-box; outline: none; }
         button.action-btn { background: #0284c7; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 8px; }
-        button.action-btn:hover { background: #0369a1; }
         
-        .repo-item { background: #1f2937; padding: 14px 18px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #38bdf8; display: flex; justify-content: space-between; align-items: center; }
+        .item-box { background: #1f2937; padding: 14px 18px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #38bdf8; display: flex; justify-content: space-between; align-items: center; }
         .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; background: #065f46; color: #34d399; }
+        .star-btn { background: #334155; color: #fbbf24; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         .log-item { font-family: monospace; font-size: 12px; color: #94a3b8; padding: 6px 0; border-bottom: 1px solid #1f2937; }
-        .editor { font-family: monospace; background: #030712; color: #38bdf8; min-height: 150px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div>
-            <div class="logo">⚡ KORVIZ PLATFORM 3.0</div>
-            <div style="font-size: 12px; color: #64748b;">Autonomous Source & Cloud Management System</div>
+            <div class="logo">⚡ KORVIZ ENTERPRISE 4.0</div>
+            <div style="font-size: 12px; color: #64748b;">Full-Cycle Code Repository & Hosting Architecture</div>
         </div>
     </div>
 
-    <!-- TUGMALAR (OYNA O'TKAZGICHLAR) -->
+    <!-- TUGMALI NAVIGATSIYA PANEL -->
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="openTab('reposTab', this)">📦 Kod Ombori</button>
-        <button class="tab-btn" onclick="openTab('editorTab', this)">📝 Fayl Tahrirchi (IDE)</button>
-        <button class="tab-btn" onclick="openTab('hostingTab', this)">🚀 Bulutli Host (Server)</button>
-        <button class="tab-btn" onclick="openTab('logsTab', this)">📋 Tizim Jurnali (Logs)</button>
+        <button class="tab-btn active" onclick="openTab('reposTab', this)">📦 Repozitoriyalar</button>
+        <button class="tab-btn" onclick="openTab('issuesTab', this)">🐞 Issues (Muammolar)</button>
+        <button class="tab-btn" onclick="openTab('pullsTab', this)">🔀 Pull Requests</button>
+        <button class="tab-btn" onclick="openTab('commitsTab', this)">📜 Commits Tarixi</button>
+        <button class="tab-btn" onclick="openTab('hostingTab', this)">🚀 Bulutli Host (24/7)</button>
+        <button class="tab-btn" onclick="openTab('logsTab', this)">📋 Tizim Logs</button>
     </div>
 
-    <!-- 1-OYNA: KOD OMBORI -->
+    <!-- 1. REPOZITORIYALAR -->
     <div id="reposTab" class="tab-content active">
         <div class="card">
             <h2>📦 Yangi Repozitoriya Yaratish</h2>
-            <input type="text" id="repoName" placeholder="Loyiha nomi (masalan: my-ai-service)">
-            <textarea id="repoDesc" placeholder="Loyiha tavsifi..."></textarea>
-            <textarea id="repoCode" class="editor" rows="4" placeholder="// Boshlang'ich kodni yozing..."></textarea>
-            <button class="action-btn" onclick="createRepo()">KORVIZ Omboriga Saqlash</button>
+            <input type="text" id="repoName" placeholder="Repozitoriya nomi...">
+            <textarea id="repoDesc" placeholder="Repozitoriya tavsifi..."></textarea>
+            <button class="action-btn" onclick="createRepo()">Saqlash</button>
         </div>
-
         <div class="card">
             <h2>Mavjud Omborlar:</h2>
             <div id="repoList">Yuklanmoqda...</div>
         </div>
     </div>
 
-    <!-- 2-OYNA: FAYL TAHRIRCHI (ONLINE IDE) -->
-    <div id="editorTab" class="tab-content">
+    <!-- 2. ISSUES (BUG TRACKING) -->
+    <div id="issuesTab" class="tab-content">
         <div class="card">
-            <h2>📝 Online Kod Tahrirlash (IDE)</h2>
-            <p style="font-size:13px; color:#94a3b8;">Repozitoriyangizdagi fayllarni o'zgartirish va yangi Commit yo'llash</p>
-            <input type="text" id="editRepoId" placeholder="Repozitoriya ID (masalan: my-ai-service-a1b2)">
-            <input type="text" id="editFileName" placeholder="Fayl nomi (masalan: index.js)">
-            <textarea id="fileContent" class="editor" rows="10" placeholder="// Kodni shu yerda tahrirlang..."></textarea>
-            <input type="text" id="commitMsg" placeholder="Commit xabari (masalan: Update core function)">
-            <button class="action-btn" style="background:#10b981;" onclick="saveCommit()">Commit Va Saqlash</button>
+            <h2>🐞 Yangi Issue (Topshiriq/Xatolik) Ocharish</h2>
+            <input type="text" id="issueRepoId" placeholder="Loyiha ID (masalan: my-ai-service-1a2b)">
+            <input type="text" id="issueTitle" placeholder="Muammo sarlavhasi (masalan: API 500 Error qaytardi)">
+            <textarea id="issueBody" placeholder="Batafsil ma'lumot..."></textarea>
+            <select id="issuePriority">
+                <option value="Low">Past Priority</option>
+                <option value="Normal" selected>Normal Priority</option>
+                <option value="URGENT">🔴 URGENT (Shoshilinch)</option>
+            </select>
+            <button class="action-btn" style="background:#e11d48;" onclick="createIssue()">Issue Yaratish</button>
+        </div>
+        <div class="card">
+            <h2>Barcha Issues:</h2>
+            <div id="issueList">Yuklanmoqda...</div>
         </div>
     </div>
 
-    <!-- 3-OYNA: BULUTLI HOSTING -->
+    <!-- 3. PULL REQUESTS -->
+    <div id="pullsTab" class="tab-content">
+        <div class="card">
+            <h2>🔀 Yangi Pull Request Yaratish</h2>
+            <input type="text" id="prRepoId" placeholder="Loyiha ID">
+            <input type="text" id="prTitle" placeholder="PR Sarlavhasi (masalan: Add JWT Auth)">
+            <input type="text" id="prSource" placeholder="Qaysi branch'dan (masalan: dev)">
+            <button class="action-btn" style="background:#8b5cf6;" onclick="createPR()">Pull Request Yo'llash</button>
+        </div>
+        <div class="card">
+            <h2>Mavjud Pull Requestlar:</h2>
+            <div id="pullList">Yuklanmoqda...</div>
+        </div>
+    </div>
+
+    <!-- 4. COMMITS HISTORY -->
+    <div id="commitsTab" class="tab-content">
+        <div class="card">
+            <h2>📜 Oxirgi Commitlar Tarixi:</h2>
+            <div id="commitList">Yuklanmoqda...</div>
+        </div>
+    </div>
+
+    <!-- 5. HOSTING -->
     <div id="hostingTab" class="tab-content">
         <div class="card">
-            <h2>🚀 Bulutli Serverda Ishga Tushirish</h2>
-            <input type="text" id="serviceName" placeholder="Servis nomi (masalan: bot-backend)">
-            <input type="text" id="runCmd" placeholder="Start Command (masalan: node index.js)">
-            <textarea id="envVars" placeholder='ENV O'zgaruvchilar (JSON formatida): {"PORT": "8080"}'></textarea>
-            <button class="action-btn" style="background: #10b981;" onclick="deployApp()">24/7 Serverni Ishga Tushirish</button>
+            <h2>🚀 Bulutli Host (Deploy Service)</h2>
+            <input type="text" id="serviceName" placeholder="Servis nomi (masalan: my-telegram-bot)">
+            <input type="text" id="runCmd" placeholder="Start Command (masalan: node server.js)">
+            <button class="action-btn" style="background:#10b981;" onclick="deployApp()">24/7 Serverni Ishga Tushirish</button>
         </div>
-
         <div class="card">
-            <h2>Faol Serverlar (24/7 Run):</h2>
+            <h2>Faol Serverlar:</h2>
             <div id="deployList">Yuklanmoqda...</div>
         </div>
     </div>
 
-    <!-- 4-OYNA: JONLI LOGLAR -->
+    <!-- 6. LOGS -->
     <div id="logsTab" class="tab-content">
         <div class="card">
-            <h2>📋 Tizim Jurnali va Jonli Loglar</h2>
-            <div id="logList">Loglar yuklanmoqda...</div>
+            <h2>📋 Platforma Jonli Loglari</h2>
+            <div id="logList">Yuklanmoqda...</div>
         </div>
     </div>
 
     <script>
-        // OYNA O'TKAZISH FUNKSIYASI
         function openTab(tabId, btnElement) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-
             document.getElementById(tabId).classList.add('active');
             btnElement.classList.add('active');
         }
 
         async function loadData() {
-            try {
-                const repoRes = await fetch('/api/repos');
-                const repos = await repoRes.json();
-                document.getElementById('repoList').innerHTML = repos.map(r => 
-                    `<div class="repo-item">
-                        <div>
-                            <b>${r.name}</b> <span style="font-size:12px; color:#64748b;">(ID: ${r.id})</span><br>
-                            <small style="color:#94a3b8">${r.description}</small>
-                        </div>
-                        <button style="width:auto; padding:6px 12px; background:#334155;" onclick="openEditorFor('${r.id}')">Tahrirlash</button>
-                     </div>`
-                ).join('') || '<div style="color:#64748b;">Mavjud omborlar yo\'q</div>';
+            // Repos
+            const repoRes = await fetch('/api/repos');
+            const repos = await repoRes.json();
+            document.getElementById('repoList').innerHTML = repos.map(r => 
+                `<div class="item-box">
+                    <div>
+                        <b>${r.name}</b> <small style="color:#64748b;">(ID: ${r.id})</small><br>
+                        <small style="color:#94a3b8">${r.description}</small><br>
+                        <small style="color:#38bdf8;">Branches: ${r.branches.join(', ')}</small>
+                    </div>
+                    <button class="star-btn" onclick="addStar('${r.id}')">⭐ ${r.stars || 0}</button>
+                 </div>`
+            ).join('') || 'Omborlar mavjud emas';
 
-                const deployRes = await fetch('/api/deployments');
-                const deploys = await deployRes.json();
-                document.getElementById('deployList').innerHTML = deploys.map(d => 
-                    `<div class="repo-item" style="border-color:#10b981">
-                        <div>
-                            <b>${d.name}</b> <span class="badge">${d.status}</span><br>
-                            <small style="color:#94a3b8">Command: <code>${d.command}</code></small>
-                        </div>
-                     </div>`
-                ).join('') || '<div style="color:#64748b;">Faol serverlar yo\'q</div>';
+            // Issues
+            const issueRes = await fetch('/api/issues');
+            const issues = await issueRes.json();
+            document.getElementById('issueList').innerHTML = issues.map(i => 
+                `<div class="item-box" style="border-color:#f43f5e">
+                    <div>
+                        <b>${i.id}: ${i.title}</b> <span class="badge" style="background:#be123c">${i.priority}</span><br>
+                        <small style="color:#94a3b8">${i.body}</small>
+                    </div>
+                 </div>`
+            ).join('') || 'Ochiq muammolar yo\'q';
 
-                const logRes = await fetch('/api/logs');
-                const logs = await logRes.json();
-                document.getElementById('logList').innerHTML = logs.map(l => 
-                    `<div class="log-item">[${new Date(l.date).toLocaleTimeString()}] <b>${l.type}</b>: ${l.msg}</div>`
-                ).join('') || '<div style="color:#64748b;">Loglar mavjud emas</div>';
+            // PRs
+            const prRes = await fetch('/api/pulls');
+            const pulls = await prRes.json();
+            document.getElementById('pullList').innerHTML = pulls.map(p => 
+                `<div class="item-box" style="border-color:#8b5cf6">
+                    <div>
+                        <b>${p.id}: ${p.title}</b><br>
+                        <small style="color:#94a3b8">${p.sourceBranch} ➔ ${p.targetBranch}</small>
+                    </div>
+                 </div>`
+            ).join('') || 'Ochiq PRlar yo\'q';
 
-            } catch (e) {
-                console.error("Xatolik:", e);
-            }
-        }
+            // Commits
+            const commitRes = await fetch('/api/commits');
+            const commits = await commitRes.json();
+            document.getElementById('commitList').innerHTML = commits.map(c => 
+                `<div class="log-item"><code>[${c.id}]</code> <b>${c.message}</b> — <small style="color:#64748b">${new Date(c.date).toLocaleString()}</small></div>`
+            ).join('') || 'Commitlar mavjud emas';
 
-        function openEditorFor(repoId) {
-            document.getElementById('editRepoId').value = repoId;
-            document.getElementById('editFileName').value = 'index.js';
-            openTab('editorTab', document.querySelectorAll('.tab-btn')[1]);
+            // Deployments
+            const deployRes = await fetch('/api/deployments');
+            const deploys = await deployRes.json();
+            document.getElementById('deployList').innerHTML = deploys.map(d => 
+                `<div class="item-box" style="border-color:#10b981">
+                    <div><b>${d.name}</b> <span class="badge">${d.status}</span><br><small style="color:#94a3b8">Cmd: ${d.command}</small></div>
+                 </div>`
+            ).join('') || 'Faol serverlar yo\'q';
+
+            // Logs
+            const logRes = await fetch('/api/logs');
+            const logs = await logRes.json();
+            document.getElementById('logList').innerHTML = logs.map(l => 
+                `<div class="log-item">[${new Date(l.date).toLocaleTimeString()}] <b>${l.type}</b>: ${l.msg}</div>`
+            ).join('') || 'Loglar yo\'q';
         }
 
         async function createRepo() {
             const name = document.getElementById('repoName').value;
             const description = document.getElementById('repoDesc').value;
-            const initialCode = document.getElementById('repoCode').value;
-            if(!name) return alert("Loyiha nomini kiriting!");
-
-            await fetch('/api/repos/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, description, initialCode })
-            });
-
-            document.getElementById('repoName').value = '';
-            document.getElementById('repoDesc').value = '';
-            document.getElementById('repoCode').value = '';
+            if(!name) return alert("Nom yozing!");
+            await fetch('/api/repos/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name, description }) });
             loadData();
-            alert("Repozitoriya yaratildi!");
         }
 
-        async function saveCommit() {
-            const repoId = document.getElementById('editRepoId').value;
-            const fileName = document.getElementById('editFileName').value || 'index.js';
-            const content = document.getElementById('fileContent').value;
-            const commitMessage = document.getElementById('commitMsg').value;
+        async function addStar(id) {
+            await fetch(`/api/repos/${id}/star`, { method: 'POST' });
+            loadData();
+        }
 
-            if(!repoId) return alert("Repo ID kiriting!");
+        async function createIssue() {
+            const repoId = document.getElementById('issueRepoId').value;
+            const title = document.getElementById('issueTitle').value;
+            const body = document.getElementById('issueBody').value;
+            const priority = document.getElementById('issuePriority').value;
+            if(!title) return alert("Sarlavha yozing!");
+            await fetch('/api/issues/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ repoId, title, body, priority }) });
+            loadData();
+        }
 
-            await fetch(`/api/repos/${repoId}/commit`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileName, content, commitMessage })
-            });
-
-            alert("Fayl muvaffaqiyatli commit qilindi!");
+        async function createPR() {
+            const repoId = document.getElementById('prRepoId').value;
+            const title = document.getElementById('prTitle').value;
+            const sourceBranch = document.getElementById('prSource').value;
+            if(!title) return alert("Sarlavha yozing!");
+            await fetch('/api/pulls/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ repoId, title, sourceBranch }) });
             loadData();
         }
 
         async function deployApp() {
             const serviceName = document.getElementById('serviceName').value;
-            const runCommand = document.getElementById('runCmd').value;
-            const envVarsRaw = document.getElementById('envVars').value;
-            if(!serviceName) return alert("Servis nomini kiriting!");
-
-            let envVars = {};
-            try { if(envVarsRaw) envVars = JSON.parse(envVarsRaw); } catch(e) {}
-
-            await fetch('/api/deploy', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ serviceName, runCommand, envVars })
-            });
-
-            document.getElementById('serviceName').value = '';
-            document.getElementById('runCmd').value = '';
-            document.getElementById('envVars').value = '';
+            const runCmd = document.getElementById('runCmd').value;
+            if(!serviceName) return alert("Servis nomi shart!");
+            await fetch('/api/deploy', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ serviceName, runCmd }) });
             loadData();
-            alert("Server ishga tushirildi!");
         }
 
         loadData();
