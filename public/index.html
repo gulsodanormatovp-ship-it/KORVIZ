@@ -9,10 +9,10 @@
         body { background: #090d16; color: #f8fafc; display: flex; height: 100vh; overflow: hidden; }
         
         /* Sidebar Styling */
-        aside { width: 285px; background: #0f172a; border-right: 1px solid #1e293b; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; }
+        aside { width: 285px; background: #0f172a; border-right: 1px solid #1e293b; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; flex-shrink: 0; }
         .logo { font-size: 22px; font-weight: bold; color: #38bdf8; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
         .menu-category { font-size: 11px; text-transform: uppercase; color: #64748b; margin: 15px 0 5px 10px; letter-spacing: 1px; font-weight: bold; }
-        .menu-item { padding: 12px 15px; border-radius: 8px; color: #94a3b8; cursor: pointer; transition: 0.2s; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+        .menu-item { padding: 12px 15px; border-radius: 8px; color: #94a3b8; cursor: pointer; transition: 0.2s; margin-bottom: 4px; font-size: 14px; display: flex; align-items: center; gap: 10px; user-select: none; }
         .menu-item:hover, .menu-item.active { background: #0284c7; color: #fff; }
 
         /* Main Workspace Styling */
@@ -43,6 +43,10 @@
         th, td { text-align: left; padding: 12px; border-bottom: 1px solid #1f2937; font-size: 14px; }
         th { color: #94a3b8; font-weight: 600; }
         td { color: #e2e8f0; }
+
+        @media(max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
@@ -103,7 +107,7 @@
                     <option value="javascript">JavaScript (Node.js V8)</option>
                     <option value="python">Python 3.11 Sandbox</option>
                 </select>
-                <textarea id="sandboxCode" class="form-control" rows="6" placeholder="Console.log('KORVIZ Sandbox active');">console.log("KORVIZ Sandbox working perfectly!");</textarea>
+                <textarea id="sandboxCode" class="form-control" rows="6" placeholder="console.log('KORVIZ Sandbox active');">console.log("KORVIZ Sandbox working perfectly!");</textarea>
                 <button class="btn" onclick="executeSandbox()">🚀 Kodni Ishga Tushirish</button>
                 <pre id="sandboxOutput">Natija bu yerda chiqadi...</pre>
             </div>
@@ -123,7 +127,7 @@
             </div>
         </div>
 
-        <!-- TAB 4: AI BOT & WORKFLOW ENGINE (JONLI DEPLOY BILAN) -->
+        <!-- TAB 4: AI BOT & WORKFLOW ENGINE -->
         <div id="tab-ai-engine" class="tab-content" style="display: none;">
             <div class="card">
                 <h3>🤖 AI Telegram Bot Konstruktori & Jonli Server Deploy</h3>
@@ -239,25 +243,33 @@
         async function executeSandbox() {
             const code = document.getElementById('sandboxCode').value;
             const lang = document.getElementById('sandboxLang').value;
-            const res = await fetch('/api/sandbox/execute', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code, lang })
-            });
-            const data = await res.json();
-            document.getElementById('sandboxOutput').innerText = data.logs;
+            try {
+                const res = await fetch('/api/sandbox/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, lang })
+                });
+                const data = await res.json();
+                document.getElementById('sandboxOutput').innerText = data.logs || JSON.stringify(data, null, 2);
+            } catch(err) {
+                document.getElementById('sandboxOutput').innerText = 'Xatolik: ' + err.message;
+            }
         }
 
         async function sendApiStudioRequest() {
             const url = document.getElementById('apiUrl').value;
             const method = document.getElementById('apiMethod').value;
-            const res = await fetch('/api/tools/http-request', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url, method })
-            });
-            const data = await res.json();
-            document.getElementById('apiStudioOutput').innerText = JSON.stringify(data, null, 2);
+            try {
+                const res = await fetch('/api/tools/http-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, method })
+                });
+                const data = await res.json();
+                document.getElementById('apiStudioOutput').innerText = JSON.stringify(data, null, 2);
+            } catch(err) {
+                document.getElementById('apiStudioOutput').innerText = 'Xatolik: ' + err.message;
+            }
         }
 
         async function deployLiveBot() {
@@ -276,9 +288,9 @@
                 });
                 const data = await res.json();
                 if(data.success) {
-                    alert('✅ ' + data.message);
+                    alert('✅ ' + (data.message || 'Bot muvaffaqiyatli ishga tushirildi!'));
                 } else {
-                    alert('❌ Xatolik: ' + data.error);
+                    alert('❌ Xatolik: ' + (data.error || 'Nomaʼlum xatolik'));
                 }
             } catch(err) {
                 alert('Tarmoq xatoligi: ' + err.message);
@@ -289,50 +301,69 @@
             const prompt = document.getElementById('aiPrompt').value;
             if(!prompt) return alert('Prompt yozing!');
             
-            const res = await fetch('/api/ai/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt, targetType: 'telegram-bot' })
-            });
-            const data = await res.json();
-            document.getElementById('aiCodeResult').innerText = data.code;
+            try {
+                const res = await fetch('/api/ai/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, targetType: 'telegram-bot' })
+                });
+                const data = await res.json();
+                document.getElementById('aiCodeResult').innerText = data.code || JSON.stringify(data, null, 2);
+            } catch(err) {
+                document.getElementById('aiCodeResult').innerText = 'Xatolik: ' + err.message;
+            }
         }
 
         async function loadCollections() {
-            const res = await fetch('/api/db/collections');
-            const data = await res.json();
-            document.getElementById('dbCollectionsOutput').innerText = JSON.stringify(data, null, 2);
+            try {
+                const res = await fetch('/api/db/collections');
+                const data = await res.json();
+                document.getElementById('dbCollectionsOutput').innerText = JSON.stringify(data, null, 2);
+            } catch(e) {
+                document.getElementById('dbCollectionsOutput').innerText = 'Maʼlumotlarni yuklab bo‘lmadi.';
+            }
         }
 
         async function createCollection() {
             const collectionName = document.getElementById('newColName').value;
             if(!collectionName) return alert('Kolleksiya nomini kiriting!');
-            const res = await fetch('/api/db/collection/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ collectionName })
-            });
-            const data = await res.json();
-            loadCollections();
-            alert('Kolleksiya muvaffaqiyatli yaratildi!');
+            try {
+                await fetch('/api/db/collection/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ collectionName })
+                });
+                loadCollections();
+                alert('Kolleksiya muvaffaqiyatli yaratildi!');
+            } catch(e) {
+                alert('Xatolik yuz berdi.');
+            }
         }
 
         async function loadRepos() {
-            const res = await fetch('/api/repos');
-            const data = await res.json();
-            document.getElementById('reposOutput').innerText = JSON.stringify(data, null, 2);
+            try {
+                const res = await fetch('/api/repos');
+                const data = await res.json();
+                document.getElementById('reposOutput').innerText = JSON.stringify(data, null, 2);
+            } catch(e) {
+                document.getElementById('reposOutput').innerText = 'Repozitoriyalarni yuklab bo‘lmadi.';
+            }
         }
 
         async function createRepository() {
             const name = document.getElementById('newRepoName').value;
             if(!name) return alert('Repozitoriy nomini kiriting!');
-            const res = await fetch('/api/repos/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name })
-            });
-            loadRepos();
-            alert('Repozitoriy ochildi!');
+            try {
+                await fetch('/api/repos/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                loadRepos();
+                alert('Repozitoriy ochildi!');
+            } catch(e) {
+                alert('Xatolik yuz berdi.');
+            }
         }
 
         async function saveEnv() {
@@ -340,57 +371,81 @@
             const value = document.getElementById('envValue').value;
             if(!key || !value) return alert('Kalit va qiymatni kiriting!');
 
-            const res = await fetch('/api/env/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ key, value })
-            });
-            const data = await res.json();
-            alert(data.message || data.error);
+            try {
+                const res = await fetch('/api/env/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, value })
+                });
+                const data = await res.json();
+                alert(data.message || data.error || 'Saqlandi!');
+            } catch(e) {
+                alert('Xatolik yuz berdi.');
+            }
         }
 
         async function loadMonitors() {
-            const res = await fetch('/api/monitors');
-            const data = await res.json();
-            document.getElementById('monitorsOutput').innerText = JSON.stringify(data, null, 2);
+            try {
+                const res = await fetch('/api/monitors');
+                const data = await res.json();
+                document.getElementById('monitorsOutput').innerText = JSON.stringify(data, null, 2);
+            } catch(e) {
+                document.getElementById('monitorsOutput').innerText = 'Monitorlarni yuklab bo‘lmadi.';
+            }
         }
 
         async function addMonitor() {
             const name = document.getElementById('monName').value;
             const url = document.getElementById('monUrl').value;
             if(!name || !url) return alert('Barcha maydonlarni to\'ldiring!');
-            await fetch('/api/monitors/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, url })
-            });
-            loadMonitors();
-            alert('Monitor qo\'shildi!');
+            try {
+                await fetch('/api/monitors/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, url })
+                });
+                loadMonitors();
+                alert('Monitor qo\'shildi!');
+            } catch(e) {
+                alert('Xatolik yuz berdi.');
+            }
         }
 
         async function loadTokens() {
-            const res = await fetch('/api/tokens');
-            const data = await res.json();
-            document.getElementById('tokensOutput').innerText = JSON.stringify(data, null, 2);
+            try {
+                const res = await fetch('/api/tokens');
+                const data = await res.json();
+                document.getElementById('tokensOutput').innerText = JSON.stringify(data, null, 2);
+            } catch(e) {
+                document.getElementById('tokensOutput').innerText = 'Tokenlarni yuklab bo‘lmadi.';
+            }
         }
 
         async function generateToken() {
             const name = document.getElementById('tokenLabel').value;
             if(!name) return alert('Token yorlig\'ini kiriting!');
-            await fetch('/api/tokens/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name })
-            });
-            loadTokens();
-            alert('Token yaratildi!');
+            try {
+                await fetch('/api/tokens/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                loadTokens();
+                alert('Token yaratildi!');
+            } catch(e) {
+                alert('Xatolik yuz berdi.');
+            }
         }
 
         async function loadLogs() {
-            const res = await fetch('/api/logs');
-            const data = await res.json();
-            let logsText = data.map(l => `[${new Date(l.date).toLocaleTimeString()}] [${l.type}] ${l.msg}`).join('\n');
-            document.getElementById('fullAuditLogs').innerText = logsText;
+            try {
+                const res = await fetch('/api/logs');
+                const data = await res.json();
+                let logsText = data.map(l => `[${new Date(l.date).toLocaleTimeString()}] [${l.type}] ${l.msg}`).join('\n');
+                document.getElementById('fullAuditLogs').innerText = logsText;
+            } catch(e) {
+                document.getElementById('fullAuditLogs').innerText = 'Loglarni yuklab bo‘lmadi.';
+            }
         }
 
         // Periodic stats update
@@ -398,9 +453,9 @@
             try {
                 const res = await fetch('/api/analytics');
                 const data = await res.json();
-                document.getElementById('st-services').innerText = data.activeServices;
-                document.getElementById('st-cols').innerText = data.totalCollections;
-                document.getElementById('st-ram').innerText = data.ramUsage;
+                if(data.activeServices) document.getElementById('st-services').innerText = data.activeServices;
+                if(data.totalCollections) document.getElementById('st-cols').innerText = data.totalCollections;
+                if(data.ramUsage) document.getElementById('st-ram').innerText = data.ramUsage;
             } catch (e) {}
         }, 5000);
     </script>
