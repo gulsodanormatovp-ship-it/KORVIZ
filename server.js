@@ -8,152 +8,136 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.static('public'));
 
 const PORT = process.env.PORT || 10000;
-const PLATFORM_NAME = "KORVIZ Engine v2.0";
-
 const DB_FILE = path.join(__dirname, 'korviz_db.json');
-const REPOS_DIR = path.join(__dirname, 'storage_repos');
-const DEPLOYS_DIR = path.join(__dirname, 'storage_deploys');
 
-if (!fs.existsSync(REPOS_DIR)) fs.mkdirSync(REPOS_DIR, { recursive: true });
-if (!fs.existsSync(DEPLOYS_DIR)) fs.mkdirSync(DEPLOYS_DIR, { recursive: true });
 if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify({ repositories: [], deployments: [], activity_logs: [] }, null, 2));
+    fs.writeFileSync(DB_FILE, JSON.stringify({ 
+        repositories: [], 
+        issues: [], 
+        pull_requests: [], 
+        commits: [], 
+        deployments: [], 
+        activity_logs: [] 
+    }, null, 2));
 }
 
 const readDB = () => {
     try { return JSON.parse(fs.readFileSync(DB_FILE, 'utf8')); }
-    catch { return { repositories: [], deployments: [], activity_logs: [] }; }
+    catch { return { repositories: [], issues: [], pull_requests: [], commits: [], deployments: [], activity_logs: [] }; }
 };
 const writeDB = (data) => fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 
-// ==========================================
-// 1. KOD OMBORI (REPOSITORY ENGINE)
-// ==========================================
+// 1. REPO & BRANCHES
+app.get('/api/repos', (req, res) => res.json(readDB().repositories));
 
-// Repozitoriyalar ro'yxati
-app.get('/api/repos', (req, res) => {
-    const db = readDB();
-    res.json(db.repositories);
-});
-
-// Yangi Repozitoriya yaratish
 app.post('/api/repos/create', (req, res) => {
-    const { name, description, defaultBranch, isPrivate, initialCode } = req.body;
-    if (!name) return res.status(400).json({ error: "Loyiha nomi kiritilmadi" });
+    const { name, description, initialCode } = req.body;
+    if (!name) return res.status(400).json({ error: "Loyiha nomi shart!" });
 
     const db = readDB();
     const repoId = `${name.toLowerCase().replace(/\s+/g, '-')}-${uuidv4().substring(0, 4)}`;
-    const repoPath = path.join(REPOS_DIR, repoId);
-
-    fs.mkdirSync(repoPath, { recursive: true });
-    
-    // Boshlang'ich fayllar yaratish
-    const mainFileName = 'index.js';
-    fs.writeFileSync(path.join(repoPath, mainFileName), initialCode || '// KORVIZ Platform Code\nconsole.log("KORVIZ System Active");');
-    fs.writeFileSync(path.join(repoPath, 'README.md'), `# ${name}\n\n${description || 'KORVIZ platformasida yaratilgan loyiha'}`);
 
     const newRepo = {
         id: repoId,
         name,
         description: description || "Tavsifsiz loyiha",
-        branch: defaultBranch || 'main',
-        isPrivate: !!isPrivate,
+        branches: ['main', 'dev'],
+        currentBranch: 'main',
         stars: 0,
-        commitsCount: 1,
-        files: [mainFileName, 'README.md'],
+        forks: 0,
         createdAt: new Date()
     };
 
     db.repositories.unshift(newRepo);
-    db.activity_logs.unshift({ type: 'REPO_CREATE', msg: `Yangi repozitoriya yaratildi: ${name}`, date: new Date() });
+    db.commits.unshift({
+        id: uuidv4().substring(0, 7),
+        repoId,
+        message: "Initial Commit",
+        author: "Developer",
+        date: new Date()
+    });
+    db.activity_logs.unshift({ type: 'REPO', msg: `Ombor yaratildi: ${name}`, date: new Date() });
+    
     writeDB(db);
-
     res.status(201).json({ message: "Repozitoriya yaratildi", repo: newRepo });
 });
 
-// Repozitoriya ichidagi fayllarni ko'rish
-app.get('/api/repos/:id/files', (req, res) => {
-    const repoPath = path.join(REPOS_DIR, req.params.id);
-    if (!fs.existsSync(repoPath)) return res.status(404).json({ error: "Repozitoriya topilmadi" });
-
-    const files = fs.readdirSync(repoPath);
-    res.json({ files });
-});
-
-// Fayl mazmunini o'qish
-app.get('/api/repos/:id/file-content', (req, res) => {
-    const { fileName } = req.query;
-    const filePath = path.join(REPOS_DIR, req.params.id, fileName);
-
-    if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Fayl topilmadi" });
-
-    const content = fs.readFileSync(filePath, 'utf8');
-    res.json({ fileName, content });
-});
-
-// Faylni tahrirlash / Commit qilish
-app.post('/api/repos/:id/commit', (req, res) => {
-    const { fileName, content, commitMessage } = req.body;
-    const repoPath = path.join(REPOS_DIR, req.params.id);
-
-    if (!fs.existsSync(repoPath)) return res.status(404).json({ error: "Repozitoriya topilmadi" });
-
-    fs.writeFileSync(path.join(repoPath, fileName), content);
-
+// STAR & FORK
+app.post('/api/repos/:id/star', (req, res) => {
     const db = readDB();
     const repo = db.repositories.find(r => r.id === req.params.id);
     if (repo) {
-        repo.commitsCount = (repo.commitsCount || 1) + 1;
-        if (!repo.files.includes(fileName)) repo.files.push(fileName);
+        repo.stars = (repo.stars || 0) + 1;
+        writeDB(db);
+        return res.json({ stars: repo.stars });
     }
-    db.activity_logs.unshift({ type: 'COMMIT', msg: `Commit (${req.params.id}): ${commitMessage || 'Fayl tahrirlandi'}`, date: new Date() });
-    writeDB(db);
-
-    res.json({ message: "Commit muvaffaqiyatli saqlandi!" });
+    res.status(404).json({ error: "Topilmadi" });
 });
 
-// ==========================================
-// 2. BULUTLI HOSTING ENGINE (DEPLOYMENT)
-// ==========================================
+// 2. ISSUES SYSTEM
+app.get('/api/issues', (req, res) => res.json(readDB().issues));
 
-app.get('/api/deployments', (req, res) => {
+app.post('/api/issues/create', (req, res) => {
+    const { repoId, title, body, priority } = req.body;
     const db = readDB();
-    res.json(db.deployments);
-});
-
-app.post('/api/deploy', (req, res) => {
-    const { serviceName, repoId, envVars, runCommand } = req.body;
-
-    if (!serviceName) return res.status(400).json({ error: "Servis nomi talab qilinadi" });
-
-    const db = readDB();
-    const deployId = `srv-${uuidv4().substring(0, 6)}`;
-
-    const newDeploy = {
-        id: deployId,
-        name: serviceName,
-        repoId: repoId || 'external-git',
-        envVars: envVars || {},
-        command: runCommand || 'node index.js',
-        status: "RUNNING 24/7",
-        cpuUsage: "0.2%",
-        ramUsage: "28MB",
-        deployedAt: new Date()
+    const newIssue = {
+        id: `ISSUE-${db.issues.length + 1}`,
+        repoId,
+        title,
+        body,
+        priority: priority || 'Normal',
+        status: 'OPEN',
+        createdAt: new Date()
     };
-
-    db.deployments.unshift(newDeploy);
-    db.activity_logs.unshift({ type: 'DEPLOY', msg: `Servis ishga tushdi: ${serviceName}`, date: new Date() });
+    db.issues.unshift(newIssue);
+    db.activity_logs.unshift({ type: 'ISSUE', msg: `Yangi Issue: #${newIssue.id} - ${title}`, date: new Date() });
     writeDB(db);
-
-    res.json({ message: "⚡ Servis KORVIZ serverida ishga tushdi!", deploy: newDeploy });
+    res.json(newIssue);
 });
 
-// System Activity Logs
-app.get('/api/logs', (req, res) => {
+// 3. PULL REQUESTS SYSTEM
+app.get('/api/pulls', (req, res) => res.json(readDB().pull_requests));
+
+app.post('/api/pulls/create', (req, res) => {
+    const { repoId, title, sourceBranch, targetBranch } = req.body;
     const db = readDB();
-    res.json(db.activity_logs.slice(0, 20));
+    const newPR = {
+        id: `PR-${db.pull_requests.length + 1}`,
+        repoId,
+        title,
+        sourceBranch,
+        targetBranch: targetBranch || 'main',
+        status: 'OPEN',
+        createdAt: new Date()
+    };
+    db.pull_requests.unshift(newPR);
+    db.activity_logs.unshift({ type: 'PR', msg: `Yangi Pull Request: ${title}`, date: new Date() });
+    writeDB(db);
+    res.json(newPR);
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 ${PLATFORM_NAME} serveri ${PORT}-portda ishlamoqda.`);
+// 4. COMMITS HISTORY
+app.get('/api/commits', (req, res) => res.json(readDB().commits));
+
+// 5. DEPLOYS & LOGS
+app.get('/api/deployments', (req, res) => res.json(readDB().deployments));
+app.post('/api/deploy', (req, res) => {
+    const { serviceName, runCmd } = req.body;
+    const db = readDB();
+    const newDeploy = {
+        id: `srv-${uuidv4().substring(0, 5)}`,
+        name: serviceName,
+        command: runCmd || 'node index.js',
+        status: 'ACTIVE 24/7',
+        cpu: '0.1%',
+        ram: '32MB'
+    };
+    db.deployments.unshift(newDeploy);
+    db.activity_logs.unshift({ type: 'DEPLOY', msg: `Server yurgizildi: ${serviceName}`, date: new Date() });
+    writeDB(db);
+    res.json(newDeploy);
 });
+
+app.get('/api/logs', (req, res) => res.json(readDB().activity_logs.slice(0, 30)));
+
+app.listen(PORT, () => console.log(`🚀 KORVIZ Platform 4.0 Pro Engine running on port ${PORT}`));
