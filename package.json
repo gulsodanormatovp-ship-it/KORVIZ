@@ -1,15 +1,13 @@
 {
-  "name": "korviz-platform",
-  "version": "1.0.0",
-  "description": "KORVIZ - Cloud Platform & Autonomous Deploy Engine",
+  "name": "korviz-enterprise",
+  "version": "50.0.0",
+  "description": "KORVIZ Enterprise Cloud & Bot Engine",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "uuid": "^9.0.1"
+    "telegraf": "^4.16.3"
   }
 }
