@@ -2,75 +2,126 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>KORVIZ Platform v2.0</title>
+    <title>KORVIZ Platform 3.0</title>
     <style>
         body { background-color: #0b0f19; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 24px; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 20px; }
-        .logo { font-size: 26px; font-weight: 800; color: #38bdf8; letter-spacing: 2px; }
-        .subtitle { font-size: 13px; color: #64748b; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
-        .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 16px; margin-bottom: 20px; }
+        .logo { font-size: 24px; font-weight: 800; color: #38bdf8; letter-spacing: 2px; }
+        
+        /* NAVIGATION TABS */
+        .nav-tabs { display: flex; gap: 10px; border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 24px; }
+        .tab-btn { background: #111827; color: #94a3b8; border: 1px solid #1f2937; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; }
+        .tab-btn:hover { background: #1f2937; color: #fff; }
+        .tab-btn.active { background: #0284c7; color: #fff; border-color: #38bdf8; }
+
+        /* TAB CONTENTS */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
         h2 { color: #f8fafc; margin-top: 0; font-size: 18px; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #030712; border: 1px solid #374151; color: #fff; border-radius: 8px; box-sizing: border-box; outline: none; }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #030712; border: 1px solid #374151; color: #fff; border-radius: 8px; box-sizing: border-box; outline: none; }
         input:focus, textarea:focus { border-color: #38bdf8; }
-        button { background: #0284c7; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 8px; }
-        button:hover { background: #0369a1; }
-        .repo-item { background: #1f2937; padding: 12px 16px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #38bdf8; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; background: #065f46; color: #34d399; }
-        .editor-box { background: #030712; border: 1px solid #374151; border-radius: 8px; padding: 12px; font-family: monospace; }
-        .log-item { font-family: monospace; font-size: 12px; color: #94a3b8; padding: 4px 0; border-bottom: 1px solid #1f2937; }
+        button.action-btn { background: #0284c7; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 8px; }
+        button.action-btn:hover { background: #0369a1; }
+        
+        .repo-item { background: #1f2937; padding: 14px 18px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #38bdf8; display: flex; justify-content: space-between; align-items: center; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; background: #065f46; color: #34d399; }
+        .log-item { font-family: monospace; font-size: 12px; color: #94a3b8; padding: 6px 0; border-bottom: 1px solid #1f2937; }
+        .editor { font-family: monospace; background: #030712; color: #38bdf8; min-height: 150px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div>
-            <div class="logo">⚡ KORVIZ PLATFORM 2.0</div>
-            <div class="subtitle">Cloud Source Engine & Hosting Platform</div>
+            <div class="logo">⚡ KORVIZ PLATFORM 3.0</div>
+            <div style="font-size: 12px; color: #64748b;">Autonomous Source & Cloud Management System</div>
         </div>
     </div>
 
-    <div class="grid">
-        <!-- 1. REPO ENGINE -->
-        <div class="card">
-            <h2>📦 Kod Ombori (Create Repository)</h2>
-            <input type="text" id="repoName" placeholder="Loyiha nomi (masalan: my-fast-api)">
-            <textarea id="repoDesc" placeholder="Loyiha tavsifi..."></textarea>
-            <textarea id="repoCode" rows="4" placeholder="// Boshlang'ich kodingizni yozing..."></textarea>
-            <button onclick="createRepo()">Omborga Saqlash</button>
+    <!-- TUGMALAR (OYNA O'TKAZGICHLAR) -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="openTab('reposTab', this)">📦 Kod Ombori</button>
+        <button class="tab-btn" onclick="openTab('editorTab', this)">📝 Fayl Tahrirchi (IDE)</button>
+        <button class="tab-btn" onclick="openTab('hostingTab', this)">🚀 Bulutli Host (Server)</button>
+        <button class="tab-btn" onclick="openTab('logsTab', this)">📋 Tizim Jurnali (Logs)</button>
+    </div>
 
-            <h3 style="font-size:15px; margin-top:24px; color:#94a3b8;">Saqlangan Repozitoriyalar:</h3>
-            <div id="repoList">Yuklanmoqda...</div>
+    <!-- 1-OYNA: KOD OMBORI -->
+    <div id="reposTab" class="tab-content active">
+        <div class="card">
+            <h2>📦 Yangi Repozitoriya Yaratish</h2>
+            <input type="text" id="repoName" placeholder="Loyiha nomi (masalan: my-ai-service)">
+            <textarea id="repoDesc" placeholder="Loyiha tavsifi..."></textarea>
+            <textarea id="repoCode" class="editor" rows="4" placeholder="// Boshlang'ich kodni yozing..."></textarea>
+            <button class="action-btn" onclick="createRepo()">KORVIZ Omboriga Saqlash</button>
         </div>
 
-        <!-- 2. CLOUD HOSTING -->
         <div class="card">
-            <h2>🚀 Bulutli Host (Deploy Service)</h2>
-            <input type="text" id="serviceName" placeholder="Servis nomi (masalan: telegram-bot-service)">
-            <input type="text" id="runCmd" placeholder="Start Command (masalan: node index.js)">
-            <textarea id="envVars" placeholder='ENV o'zgaruvchilar (JSON formatida): {"BOT_TOKEN": "12345"}'></textarea>
-            <button onclick="deployApp()" style="background: #10b981;">KORVIZ Serverida Yurgizish</button>
+            <h2>Mavjud Omborlar:</h2>
+            <div id="repoList">Yuklanmoqda...</div>
+        </div>
+    </div>
 
-            <h3 style="font-size:15px; margin-top:24px; color:#94a3b8;">Faol Serverlar (24/7):</h3>
+    <!-- 2-OYNA: FAYL TAHRIRCHI (ONLINE IDE) -->
+    <div id="editorTab" class="tab-content">
+        <div class="card">
+            <h2>📝 Online Kod Tahrirlash (IDE)</h2>
+            <p style="font-size:13px; color:#94a3b8;">Repozitoriyangizdagi fayllarni o'zgartirish va yangi Commit yo'llash</p>
+            <input type="text" id="editRepoId" placeholder="Repozitoriya ID (masalan: my-ai-service-a1b2)">
+            <input type="text" id="editFileName" placeholder="Fayl nomi (masalan: index.js)">
+            <textarea id="fileContent" class="editor" rows="10" placeholder="// Kodni shu yerda tahrirlang..."></textarea>
+            <input type="text" id="commitMsg" placeholder="Commit xabari (masalan: Update core function)">
+            <button class="action-btn" style="background:#10b981;" onclick="saveCommit()">Commit Va Saqlash</button>
+        </div>
+    </div>
+
+    <!-- 3-OYNA: BULUTLI HOSTING -->
+    <div id="hostingTab" class="tab-content">
+        <div class="card">
+            <h2>🚀 Bulutli Serverda Ishga Tushirish</h2>
+            <input type="text" id="serviceName" placeholder="Servis nomi (masalan: bot-backend)">
+            <input type="text" id="runCmd" placeholder="Start Command (masalan: node index.js)">
+            <textarea id="envVars" placeholder='ENV O'zgaruvchilar (JSON formatida): {"PORT": "8080"}'></textarea>
+            <button class="action-btn" style="background: #10b981;" onclick="deployApp()">24/7 Serverni Ishga Tushirish</button>
+        </div>
+
+        <div class="card">
+            <h2>Faol Serverlar (24/7 Run):</h2>
             <div id="deployList">Yuklanmoqda...</div>
         </div>
     </div>
 
-    <!-- 3. LOGS & ACTIVITY -->
-    <div class="card" style="margin-top:24px;">
-        <h2>📋 Tizim Jurnali va Jonli Loglar (Live System Logs)</h2>
-        <div id="logList">Loglar yuklanmoqda...</div>
+    <!-- 4-OYNA: JONLI LOGLAR -->
+    <div id="logsTab" class="tab-content">
+        <div class="card">
+            <h2>📋 Tizim Jurnali va Jonli Loglar</h2>
+            <div id="logList">Loglar yuklanmoqda...</div>
+        </div>
     </div>
 
     <script>
+        // OYNA O'TKAZISH FUNKSIYASI
+        function openTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+
         async function loadData() {
             try {
                 const repoRes = await fetch('/api/repos');
                 const repos = await repoRes.json();
                 document.getElementById('repoList').innerHTML = repos.map(r => 
                     `<div class="repo-item">
-                        <b>${r.name}</b> <span style="font-size:12px; color:#64748b;">(Branch: ${r.branch} | Commits: ${r.commitsCount || 1})</span><br>
-                        <small style="color:#94a3b8">${r.description}</small>
+                        <div>
+                            <b>${r.name}</b> <span style="font-size:12px; color:#64748b;">(ID: ${r.id})</span><br>
+                            <small style="color:#94a3b8">${r.description}</small>
+                        </div>
+                        <button style="width:auto; padding:6px 12px; background:#334155;" onclick="openEditorFor('${r.id}')">Tahrirlash</button>
                      </div>`
                 ).join('') || '<div style="color:#64748b;">Mavjud omborlar yo\'q</div>';
 
@@ -78,8 +129,10 @@
                 const deploys = await deployRes.json();
                 document.getElementById('deployList').innerHTML = deploys.map(d => 
                     `<div class="repo-item" style="border-color:#10b981">
-                        <b>${d.name}</b> <span class="badge">${d.status}</span>
-                        <div style="font-size:12px; color:#94a3b8; margin-top:4px;">Command: <code>${d.command}</code> | RAM: ${d.ramUsage}</div>
+                        <div>
+                            <b>${d.name}</b> <span class="badge">${d.status}</span><br>
+                            <small style="color:#94a3b8">Command: <code>${d.command}</code></small>
+                        </div>
                      </div>`
                 ).join('') || '<div style="color:#64748b;">Faol serverlar yo\'q</div>';
 
@@ -90,8 +143,14 @@
                 ).join('') || '<div style="color:#64748b;">Loglar mavjud emas</div>';
 
             } catch (e) {
-                console.error("Yuklashda xatolik:", e);
+                console.error("Xatolik:", e);
             }
+        }
+
+        function openEditorFor(repoId) {
+            document.getElementById('editRepoId').value = repoId;
+            document.getElementById('editFileName').value = 'index.js';
+            openTab('editorTab', document.querySelectorAll('.tab-btn')[1]);
         }
 
         async function createRepo() {
@@ -110,6 +169,25 @@
             document.getElementById('repoDesc').value = '';
             document.getElementById('repoCode').value = '';
             loadData();
+            alert("Repozitoriya yaratildi!");
+        }
+
+        async function saveCommit() {
+            const repoId = document.getElementById('editRepoId').value;
+            const fileName = document.getElementById('editFileName').value || 'index.js';
+            const content = document.getElementById('fileContent').value;
+            const commitMessage = document.getElementById('commitMsg').value;
+
+            if(!repoId) return alert("Repo ID kiriting!");
+
+            await fetch(`/api/repos/${repoId}/commit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileName, content, commitMessage })
+            });
+
+            alert("Fayl muvaffaqiyatli commit qilindi!");
+            loadData();
         }
 
         async function deployApp() {
@@ -119,7 +197,7 @@
             if(!serviceName) return alert("Servis nomini kiriting!");
 
             let envVars = {};
-            try { if(envVarsRaw) envVars = JSON.parse(envVarsRaw); } catch(e) { return alert("ENV formati xato (JSON kiriting)"); }
+            try { if(envVarsRaw) envVars = JSON.parse(envVarsRaw); } catch(e) {}
 
             await fetch('/api/deploy', {
                 method: 'POST',
@@ -131,10 +209,10 @@
             document.getElementById('runCmd').value = '';
             document.getElementById('envVars').value = '';
             loadData();
+            alert("Server ishga tushirildi!");
         }
 
         loadData();
-        setInterval(loadData, 5000); // 5 soniyada avto-yangilash
     </script>
 </body>
 </html>
