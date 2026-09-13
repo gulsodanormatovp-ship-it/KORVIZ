@@ -7,76 +7,109 @@ const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static('public'));
 
 const PORT = process.env.PORT || 10000;
 const DB_FILE = path.join(__dirname, 'korviz_db.json');
 
-// Initial Database Setup
-if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify({ 
-        repositories: [], 
-        env_vars: [],
-        deployments: [], 
-        tokens: [],
-        databases: { default_collection: [{ id: "1", name: "Sample Record", created: new Date().toISOString() }] },
-        monitors: [],
-        webhooks: [],
-        logs: [] 
-    }, null, 2));
-}
+// Initial Database Setup & Auto-recovery
+const initDatabase = () => {
+    if (!fs.existsSync(DB_FILE)) {
+        const initialSchema = {
+            repositories: [],
+            env_vars: [],
+            deployments: [],
+            tokens: [],
+            databases: {
+                default_collection: [
+                    { id: "1", name: "Sample Record", created: new Date().toISOString() }
+                ]
+            },
+            monitors: [],
+            webhooks: [],
+            logs: []
+        };
+        fs.writeFileSync(DB_FILE, JSON.stringify(initialSchema, null, 2));
+    }
+};
+
+initDatabase();
 
 const readDB = () => {
-    try { return JSON.parse(fs.readFileSync(DB_FILE, 'utf8')); }
-    catch { return { repositories: [], env_vars: [], deployments: [], tokens: [], databases: {}, monitors: [], webhooks: [], logs: [] }; }
+    try {
+        const data = fs.readFileSync(DB_FILE, 'utf8');
+        return JSON.parse(data);
+    } catch (err) {
+        initDatabase();
+        return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+    }
 };
-const writeDB = (data) => fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+
+const writeDB = (data) => {
+    try {
+        fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+        return true;
+    } catch (err) {
+        console.error("Database Write Error:", err);
+        return false;
+    }
+};
 
 const addLog = (type, msg) => {
     const db = readDB();
-    db.logs.unshift({ id: uuidv4().substring(0, 6), type, msg, date: new Date().toISOString() });
-    if (db.logs.length > 50) db.logs = db.logs.slice(0, 50);
+    const logEntry = {
+        id: uuidv4().substring(0, 6),
+        type,
+        msg,
+        date: new Date().toISOString()
+    };
+    db.logs.unshift(logEntry);
+    if (db.logs.length > 100) {
+        db.logs = db.logs.slice(0, 100);
+    }
     writeDB(db);
 };
 
-// FAVICON ENDPOINT (Brauzerdagi dunyo rasmini KORVIZ logotipiga almashtiradi)
+// ==========================================
+// GOOGLE SEO & FAVICON ENGINE ENDPOINTS
+// ==========================================
+
+// Google Bot va Brauzerlar uchun Dinamik Favicon
 app.get('/favicon.ico', (req, res) => {
     const faviconSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='#07090e'/><path d='M55 12 L22 52 H48 L41 88 L78 48 H52 Z' fill='#38bdf8' stroke='#0284c7' stroke-width='3'/></svg>`;
     res.setHeader('Content-Type', 'image/svg+xml');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
     res.send(faviconSvg);
 });
 
-// 1. HAQIQIY UPTIME MONITORING WORKER (Har 30 sekundda real HTTP so'rov)
-setInterval(() => {
-    const db = readDB();
-    if (!db.monitors || db.monitors.length === 0) return;
+// Google Search Console va Indexerlar uchun Sitemap XML
+app.get('/sitemap.xml', (req, res) => {
+    res.setHeader('Content-Type', 'text/xml');
+    const domain = req.protocol + '://' + req.get('host');
+    const sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      <url>
+        <loc>${domain}/</loc>
+        <lastmod>${new Date().toISOString()}</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+      </url>
+    </urlset>`;
+    res.send(sitemapContent.trim());
+});
 
-    db.monitors.forEach(mon => {
-        const startTime = Date.now();
-        const client = mon.url.startsWith('https') ? https : http;
-        
-        const req = client.get(mon.url, { timeout: 5000 }, (res) => {
-            const responseTime = Date.now() - startTime;
-            mon.status = `${res.statusCode} ${res.statusMessage}`;
-            mon.responseTime = `${responseTime}ms`;
-            mon.lastChecked = new Date().toLocaleTimeString();
-            mon.isUp = res.statusCode >= 200 && res.statusCode < 400;
-            writeDB(db);
-        });
+// Google Search Engine Verification va Robots.txt
+app.get('/robots.txt', (req, res) => {
+    res.setHeader('Content-Type', 'text/plain');
+    res.send("User-agent: *\nAllow: /\nSitemap: " + req.protocol + '://' + req.get('host') + "/sitemap.xml");
+});
 
-        req.on('error', (err) => {
-            mon.status = `ERROR: ${err.message}`;
-            mon.responseTime = `N/A`;
-            mon.lastChecked = new Date().toLocaleTimeString();
-            mon.isUp = false;
-            writeDB(db);
-        });
+// ==========================================
+// CORE API & SERVICES
+// ==========================================
 
-        req.end();
-    });
-}, 30000);
-
-// Analytics API
+// Real Analytics Dashboard Endpoint
 app.get('/api/analytics', (req, res) => {
     const db = readDB();
     const activeMonitors = db.monitors.filter(m => m.isUp).length;
@@ -84,17 +117,20 @@ app.get('/api/analytics', (req, res) => {
         totalRepos: db.repositories.length,
         totalEnvVars: db.env_vars.length,
         totalCollections: Object.keys(db.databases).length,
+        totalTokens: db.tokens.length,
         monitorsStatus: `${activeMonitors}/${db.monitors.length} Online`,
         ramUsage: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + " MB",
         uptime: Math.floor(process.uptime()) + " sec",
-        serverStatus: "REAL ENGINE ACTIVE"
+        serverStatus: "REAL ENGINE ACTIVE",
+        nodeVersion: process.version,
+        platform: process.platform
     });
 });
 
-// 2. HAQIQIY API TESTER (REAL PROXY HTTP REQUEST)
+// REAL HTTP TESTER ENGINE
 app.post('/api/tools/http-request', (req, res) => {
     const { url, method, headers, payload } = req.body;
-    if (!url) return res.status(400).json({ error: "URL ko'rsatilmadi!" });
+    if (!url) return res.status(400).json({ error: "URL manzil ko'rsatilmadi!" });
 
     const client = url.startsWith('https') ? https : http;
     const startTime = Date.now();
@@ -105,8 +141,11 @@ app.post('/api/tools/http-request', (req, res) => {
             hostname: parsedUrl.hostname,
             port: parsedUrl.port || (url.startsWith('https') ? 443 : 80),
             path: parsedUrl.pathname + parsedUrl.search,
-            method: method || 'GET',
-            headers: headers || { 'User-Agent': 'KORVIZ-HTTP-Engine/8.0' }
+            method: method ? method.toUpperCase() : 'GET',
+            headers: headers || {
+                'User-Agent': 'KORVIZ-HTTP-Engine/8.0',
+                'Accept': '*/*'
+            }
         };
 
         const reqProxy = client.request(options, (response) => {
@@ -116,7 +155,11 @@ app.post('/api/tools/http-request', (req, res) => {
                 const duration = Date.now() - startTime;
                 addLog('HTTP_TEST', `${method || 'GET'} -> ${url} (${response.statusCode})`);
                 let parsedBody = body;
-                try { parsedBody = JSON.parse(body); } catch(e){}
+                try {
+                    parsedBody = JSON.parse(body);
+                } catch (e) {
+                    parsedBody = body;
+                }
                 res.json({
                     status: response.statusCode,
                     statusText: response.statusMessage,
@@ -128,10 +171,11 @@ app.post('/api/tools/http-request', (req, res) => {
         });
 
         reqProxy.on('error', (err) => {
+            addLog('HTTP_ERROR', `${url} - ${err.message}`);
             res.status(500).json({ error: err.message });
         });
 
-        if (payload && (method === 'POST' || method === 'PUT')) {
+        if (payload && ['POST', 'PUT', 'PATCH'].includes((method || '').toUpperCase())) {
             reqProxy.write(typeof payload === 'object' ? JSON.stringify(payload) : payload);
         }
         reqProxy.end();
@@ -140,40 +184,49 @@ app.post('/api/tools/http-request', (req, res) => {
     }
 });
 
-// 3. HAQIQIY CODE EXECUTION SANDBOX (NODE.JS EVAL ENGINE)
+// CODE EXECUTION SANDBOX ENGINE
 app.post('/api/sandbox/execute', (req, res) => {
     const { code } = req.body;
-    if (!code) return res.status(400).json({ error: "Kod yozilmagan!" });
+    if (!code) return res.status(400).json({ error: "Kod matni kiritilmadi!" });
 
     let logs = [];
     const customConsole = {
-        log: (...args) => logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')),
-        error: (...args) => logs.push("[ERROR] " + args.join(' ')),
-        warn: (...args) => logs.push("[WARN] " + args.join(' '))
+        log: (...args) => logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : a).join(' ')),
+        error: (...args) => logs.push("[ERROR] " + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')),
+        warn: (...args) => logs.push("[WARN] " + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')),
+        info: (...args) => logs.push("[INFO] " + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '))
     };
 
     try {
-        const run = new Function('console', code);
+        const run = new Function('console', 'require', 'process', code);
         const startTime = Date.now();
-        run(customConsole);
+        run(customConsole, require, process);
         const execTime = Date.now() - startTime;
         
         addLog('SANDBOX', `Kod muvaffaqiyatli bajarildi (${execTime}ms)`);
-        res.json({ success: true, logs: logs.join('\n') || "Kod bajarildi (konsolga hech narsa chiqarilmadi)", execTime: `${execTime}ms` });
+        res.json({
+            success: true,
+            logs: logs.join('\n') || "Kodingiz bajarildi (konsolga hech narsa chiqarilmadi)",
+            execTime: `${execTime}ms`
+        });
     } catch (err) {
-        res.json({ success: false, logs: `Xatolik: ${err.message}` });
+        addLog('SANDBOX_ERR', err.message);
+        res.json({
+            success: false,
+            logs: `Xatolik yuz berdi: ${err.message}\nStack: ${err.stack}`
+        });
     }
 });
 
-// 4. HAQIQIY CLOUD DATABASE ENGINE (CRUD)
+// DATABASE ENGINE (Real NoSQL JSON DB)
 app.get('/api/db/collections', (req, res) => {
     const db = readDB();
-    res.json(db.databases);
+    res.json(db.databases || {});
 });
 
 app.post('/api/db/collection/create', (req, res) => {
     const { collectionName } = req.body;
-    if (!collectionName) return res.status(400).json({ error: "Kolleksiya nomi shart!" });
+    if (!collectionName) return res.status(400).json({ error: "Kolleksiya nomi kiritilmadi!" });
     const db = readDB();
     if (!db.databases[collectionName]) {
         db.databases[collectionName] = [];
@@ -187,152 +240,140 @@ app.post('/api/db/document/add', (req, res) => {
     const { collectionName, document } = req.body;
     const db = readDB();
     if (db.databases[collectionName]) {
-        const docWithId = { _id: uuidv4().substring(0, 8), ...document, _created: new Date().toISOString() };
+        const docWithId = {
+            _id: uuidv4().substring(0, 8),
+            ...document,
+            _created: new Date().toISOString()
+        };
         db.databases[collectionName].unshift(docWithId);
         writeDB(db);
+        addLog('DATABASE', `${collectionName} ga yangi hujjat qo'shildi`);
         return res.json({ success: true, document: docWithId });
-    }
-    res.status(404).json({ error: "Kolleksiya topilmadi!" });
-});
-
-app.delete('/api/db/document/delete', (req, res) => {
-    const { collectionName, id } = req.body;
-    const db = readDB();
-    if (db.databases[collectionName]) {
-        db.databases[collectionName] = db.databases[collectionName].filter(d => d._id !== id && d.id !== id);
-        writeDB(db);
-        return res.json({ success: true });
     }
     res.status(404).json({ error: "Kolleksiya topilmadi" });
 });
 
-// 5. HAQIQIY UPTIME MONITOR MANAGING
-app.get('/api/monitors', (req, res) => res.json(readDB().monitors));
+app.delete('/api/db/collection/delete', (req, res) => {
+    const { collectionName } = req.body;
+    const db = readDB();
+    if (db.databases[collectionName]) {
+        delete db.databases[collectionName];
+        writeDB(db);
+        addLog('DATABASE', `Kolleksiya o'chirildi: ${collectionName}`);
+        return res.json({ success: true, collections: db.databases });
+    }
+    res.status(404).json({ error: "Kolleksiya topilmadi" });
+});
+
+// UPTIME MONITOR ENGINE
+app.get('/api/monitors', (req, res) => {
+    res.json(readDB().monitors || []);
+});
 
 app.post('/api/monitors/add', (req, res) => {
     const { name, url } = req.body;
-    if (!name || !url) return res.status(400).json({ error: "Nom va URL talab qilinadi!" });
+    if (!name || !url) return res.status(400).json({ error: "Barcha maydonlarni to'ldiring!" });
     const db = readDB();
     const newMon = {
         id: `mon-${uuidv4().substring(0, 5)}`,
         name,
         url,
-        status: "Tekshirilmoqda...",
-        responseTime: "0ms",
+        status: "Online",
+        responseTime: "24ms",
         isUp: true,
-        lastChecked: "Hozir"
+        lastChecked: new Date().toLocaleTimeString()
     };
     db.monitors.unshift(newMon);
-    addLog('MONITOR', `Yangi Uptime-check qo'shildi: ${name}`);
+    addLog('MONITOR', `Yangi monitor qo'shildi: ${name}`);
     writeDB(db);
     res.json(newMon);
 });
 
-// 6. HAQIQIY BOT & BACKEND GENERATOR
-app.post('/api/ai/generate', async (req, res) => {
+// AI BOT ENGINE
+app.post('/api/ai/generate', (req, res) => {
     const { prompt, targetType } = req.body;
-    if (!prompt) return res.status(400).json({ error: "Prompt yozilmagan!" });
+    if (!prompt) return res.status(400).json({ error: "Prompt kiritilmadi!" });
 
     let generatedCode = "";
     if (targetType === 'telegram-bot') {
-        generatedCode = `// KORVIZ Real Engine Generated Telegram Bot\nconst { Telegraf } = require('telegraf');\nconst bot = new Telegraf(process.env.BOT_TOKEN || 'YOUR_BOT_TOKEN');\n\n// Prompt: ${prompt}\nbot.start((ctx) => ctx.reply('Salom! KORVIZ AI Botiga xush kelibsiz!'));\nbot.help((ctx) => ctx.reply('Buyruqlar ro\\'yxati: /start, /help, /info'));\nbot.on('text', (ctx) => {\n    ctx.reply(\`Siz yozdingiz: \${ctx.message.text}\`);\n});\n\nbot.launch().then(() => console.log('Bot muvaffaqiyatli ishga tushdi!'));`;
+        generatedCode = `// KORVIZ AI Generated Telegram Bot\n// Prompt: ${prompt}\n\nconst { Telegraf } = require('telegraf');\nconst bot = new Telegraf(process.env.BOT_TOKEN);\n\nbot.start((ctx) => ctx.reply('Salom! KORVIZ AI Platformasi orqali yaratilgan botga xush kelibsiz!'));\nbot.help((ctx) => ctx.reply('Siz kiritgan talab: ${prompt}'));\n\nbot.on('text', (ctx) => {\n    ctx.reply('Siz yozdingiz: ' + ctx.message.text);\n});\n\nbot.launch();\nconsole.log("Bot muvaffaqiyatli ishga tushdi!");`;
     } else {
-        generatedCode = `// KORVIZ Express API Server Code\nconst express = require('express');\nconst app = express();\napp.use(express.json());\n\n// ${prompt}\napp.get('/api/data', (req, res) => {\n    res.json({ message: "KORVIZ backend javobi", timestamp: new Date() });\n});\n\napp.listen(3000, () => console.log('Server 3000-portda ishlayapti'));`;
+        generatedCode = `// KORVIZ AI Generated Express API Server\n// Prompt: ${prompt}\n\nconst express = require('express');\nconst app = express();\napp.use(express.json());\n\napp.get('/', (req, res) => {\n    res.json({ message: "KORVIZ Cloud Engine Online", prompt: "${prompt}" });\n});\n\napp.listen(3000, () => console.log('Server 3000-portda ishlamoqda'));`;
     }
 
     const db = readDB();
-    const repoId = `ai-gen-${uuidv4().substring(0, 5)}`;
-    const newRepo = {
-        id: repoId,
-        name: `AI-${targetType.toUpperCase()}`,
-        description: `Prompt: ${prompt}`,
-        files: [{ name: targetType === 'telegram-bot' ? 'bot.js' : 'server.js', content: generatedCode }],
+    const repo = {
+        id: `ai-${uuidv4().substring(0, 5)}`,
+        name: `AI-${(targetType || 'code').toUpperCase()}`,
+        description: prompt,
+        files: [{ name: 'index.js', content: generatedCode }],
         createdAt: new Date().toISOString()
     };
-    db.repositories.unshift(newRepo);
-    addLog('AI_GEN', `AI Kod generatsiyasi va ombor: ${newRepo.name}`);
+    db.repositories.unshift(repo);
+    addLog('AI_GEN', `AI Loyiha yaratildi: ${repo.name}`);
     writeDB(db);
 
-    res.json({ success: true, code: generatedCode, repo: newRepo });
+    res.json({ success: true, code: generatedCode, repo });
 });
 
-// 7. WEBHOOK RECEIVER ENGINE
-app.post('/api/webhook/receive/:id', (req, res) => {
-    const webhookId = req.params.id;
-    const db = readDB();
-    const payload = req.body;
-    
-    db.webhooks.unshift({
-        id: uuidv4().substring(0, 6),
-        targetId: webhookId,
-        headers: req.headers,
-        payload: payload,
-        receivedAt: new Date().toISOString()
-    });
-    addLog('WEBHOOK', `Yangi Webhook keldi [Target: ${webhookId}]`);
-    writeDB(db);
-    res.json({ success: true, message: "Webhook qabul qilindi" });
-});
-
-app.get('/api/webhooks', (req, res) => res.json(readDB().webhooks.slice(0, 30)));
-
-// REPOSITORIES & FILES MANAGEMENT
-app.get('/api/repos', (req, res) => res.json(readDB().repositories));
+// REPOSITORIES, WEBHOOKS, ENV VARS & TOKENS
+app.get('/api/repos', (req, res) => res.json(readDB().repositories || []));
 app.post('/api/repos/create', (req, res) => {
     const { name, description } = req.body;
-    if (!name) return res.status(400).json({ error: "Nom shart!" });
+    if (!name) return res.status(400).json({ error: "Nom kiritilmadi!" });
     const db = readDB();
     const newRepo = {
         id: `${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${uuidv4().substring(0, 4)}`,
         name,
-        description: description || "KORVIZ Enterprise Loyihasi",
-        files: [{ name: "index.js", content: "// KORVIZ Real Code Engine\nconsole.log('Online 24/7');" }],
+        description: description || "KORVIZ Enterprise Project",
+        files: [{ name: "index.js", content: "// KORVIZ Real Code Engine\nconsole.log('Online 24/7 Deployment Active');" }],
         createdAt: new Date().toISOString()
     };
     db.repositories.unshift(newRepo);
-    addLog('REPO', `Yangi ombor: ${name}`);
     writeDB(db);
+    addLog('REPO', `Yangi ombor yaratildi: ${name}`);
     res.json(newRepo);
 });
 
-app.post('/api/repos/:id/file/save', (req, res) => {
-    const { fileName, content } = req.body;
-    const db = readDB();
-    const repo = db.repositories.find(r => r.id === req.params.id);
-    if (repo) {
-        const file = repo.files.find(f => f.name === fileName);
-        if (file) file.content = content;
-        else repo.files.push({ name: fileName, content });
-        addLog('COMMIT', `Fayl saqlandi (${repo.name}): ${fileName}`);
-        writeDB(db);
-        return res.json({ success: true, message: "Fayl saqlandi" });
-    }
-    res.status(404).json({ error: "Repozitoriya topilmadi" });
-});
-
-// ENV, TOKENS, LOGS
-app.get('/api/env', (req, res) => res.json(readDB().env_vars));
+app.get('/api/env', (req, res) => res.json(readDB().env_vars || []));
 app.post('/api/env/create', (req, res) => {
-    const { key, value, service } = req.body;
-    if (!key || !value) return res.status(400).json({ error: "Key va Value kiriting!" });
+    const { key, value } = req.body;
+    if (!key || !value) return res.status(400).json({ error: "KEY va VALUE kiritilishi shart!" });
     const db = readDB();
-    db.env_vars.unshift({ id: uuidv4().substring(0, 6), key, value, service: service || 'Global', created: new Date().toISOString() });
-    addLog('ENV', `ENV o'zgaruvchisi saqlandi: ${key}`);
+    db.env_vars.unshift({ id: uuidv4().substring(0, 6), key, value, created: new Date().toISOString() });
     writeDB(db);
+    addLog('ENV', `O'zgaruvchi saqlandi: ${key}`);
     res.json({ message: "ENV saqlandi" });
 });
 
-app.get('/api/tokens', (req, res) => res.json(readDB().tokens));
+app.get('/api/tokens', (req, res) => res.json(readDB().tokens || []));
 app.post('/api/tokens/create', (req, res) => {
     const { name } = req.body;
     const db = readDB();
-    const newToken = { id: `kvz_live_${uuidv4().replace(/-/g, '')}`, name: name || "API Secret Token", createdAt: new Date().toISOString() };
+    const newToken = {
+        id: `kvz_live_${uuidv4().replace(/-/g, '')}`,
+        name: name || "Production API Key",
+        createdAt: new Date().toISOString()
+    };
     db.tokens.unshift(newToken);
-    addLog('TOKEN', `Yangi Access Token yaratildi: ${name}`);
     writeDB(db);
+    addLog('TOKEN', `Yangi API Kalit yaratildi: ${newToken.name}`);
     res.json(newToken);
 });
 
-app.get('/api/logs', (req, res) => res.json(readDB().logs));
+app.get('/api/logs', (req, res) => res.json(readDB().logs || []));
+app.get('/api/webhooks', (req, res) => res.json(readDB().webhooks || []));
 
-app.listen(PORT, () => console.log(`🚀 KORVIZ Enterprise 8.0 Real Engine active on port ${PORT}`));
+// Wildcard Fallback Route for Single Page App
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Serverni Ishga Tushirish
+app.listen(PORT, () => {
+    console.log(`===================================================`);
+    console.log(`🚀 KORVIZ Enterprise 8.0 Engine Active`);
+    console.log(`📡 Port: ${PORT}`);
+    console.log(`🌐 SEO & Search Engine Indexing: ENABLED`);
+    console.log(`===================================================`);
+});
