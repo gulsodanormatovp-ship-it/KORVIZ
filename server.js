@@ -39,6 +39,13 @@ const addLog = (type, msg) => {
     writeDB(db);
 };
 
+// FAVICON ENDPOINT (Brauzerdagi dunyo rasmini KORVIZ logotipiga almashtiradi)
+app.get('/favicon.ico', (req, res) => {
+    const faviconSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='#07090e'/><path d='M55 12 L22 52 H48 L41 88 L78 48 H52 Z' fill='#38bdf8' stroke='#0284c7' stroke-width='3'/></svg>`;
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.send(faviconSvg);
+});
+
 // 1. HAQIQIY UPTIME MONITORING WORKER (Har 30 sekundda real HTTP so'rov)
 setInterval(() => {
     const db = readDB();
@@ -221,15 +228,14 @@ app.post('/api/monitors/add', (req, res) => {
     res.json(newMon);
 });
 
-// 6. HAQIQIY GEMINI AI INTEGRATION (BOT & BACKEND GENERATOR)
+// 6. HAQIQIY BOT & BACKEND GENERATOR
 app.post('/api/ai/generate', async (req, res) => {
     const { prompt, targetType } = req.body;
     if (!prompt) return res.status(400).json({ error: "Prompt yozilmagan!" });
 
-    // Node.js shablon va mantiq generatori
     let generatedCode = "";
     if (targetType === 'telegram-bot') {
-        generatedCode = `// KORVIZ Real Engine Generated Telegram Bot\nconst { Telegraf } = require('telegraf');\nconst bot = new Telegraf(process.env.BOT_TOKEN || 'YOUR_BOT_TOKEN');\n\n// Prompt mantiqiga ko'ra yaratildi: ${prompt}\nbot.start((ctx) => ctx.reply('Salom! KORVIZ AI Botiga xush kelibsiz!'));\nbot.help((ctx) => ctx.reply('Buyruqlar ro\\'yxati: /start, /help, /info'));\nbot.on('text', (ctx) => {\n    ctx.reply(\`Siz yozdingiz: \${ctx.message.text}\`);\n});\n\nbot.launch().then(() => console.log('Bot muvaffaqiyatli ishga tushdi!'));`;
+        generatedCode = `// KORVIZ Real Engine Generated Telegram Bot\nconst { Telegraf } = require('telegraf');\nconst bot = new Telegraf(process.env.BOT_TOKEN || 'YOUR_BOT_TOKEN');\n\n// Prompt: ${prompt}\nbot.start((ctx) => ctx.reply('Salom! KORVIZ AI Botiga xush kelibsiz!'));\nbot.help((ctx) => ctx.reply('Buyruqlar ro\\'yxati: /start, /help, /info'));\nbot.on('text', (ctx) => {\n    ctx.reply(\`Siz yozdingiz: \${ctx.message.text}\`);\n});\n\nbot.launch().then(() => console.log('Bot muvaffaqiyatli ishga tushdi!'));`;
     } else {
         generatedCode = `// KORVIZ Express API Server Code\nconst express = require('express');\nconst app = express();\napp.use(express.json());\n\n// ${prompt}\napp.get('/api/data', (req, res) => {\n    res.json({ message: "KORVIZ backend javobi", timestamp: new Date() });\n});\n\napp.listen(3000, () => console.log('Server 3000-portda ishlayapti'));`;
     }
@@ -244,7 +250,7 @@ app.post('/api/ai/generate', async (req, res) => {
         createdAt: new Date().toISOString()
     };
     db.repositories.unshift(newRepo);
-    addLog('AI_GEN', `AI Kod generatsiyasi va repozitoriya: ${newRepo.name}`);
+    addLog('AI_GEN', `AI Kod generatsiyasi va ombor: ${newRepo.name}`);
     writeDB(db);
 
     res.json({ success: true, code: generatedCode, repo: newRepo });
