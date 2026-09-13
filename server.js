@@ -11,7 +11,10 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Static frontend serving
-app.use(express.static(path.join(__dirname, 'public')));
+const publicPath = path.join(__dirname, 'public');
+if (fs.existsSync(publicPath)) {
+    app.use(express.static(publicPath));
+}
 
 // ==========================================
 // KORVIZ ENTERPRISE v50.0 - IN-MEMORY DB & KERNEL
@@ -43,7 +46,7 @@ let enterpriseState = {
         { id: "tok_v50_live_9981", name: "Production Enterprise Gateway Key", created: new Date() }
     ],
     auditLogs: [
-        { type: "KERNEL", msg: "KORVIZ v50.0 Enterprise Kernel initialized successfully with 10 modules and Live Deploy.", date: new Date() },
+        { type: "KERNEL", msg: "KORVIZ v50.0 Enterprise Kernel initialized successfully with modules and Live Deploy.", date: new Date() },
         { type: "SECURITY", msg: "Glassmorphism UI Shield, Vault encryption, and Bot Engine online.", date: new Date() }
     ]
 };
@@ -76,7 +79,7 @@ app.get('/api/analytics', (req, res) => {
             monitorsStatus: `${onlineMonitors}/${enterpriseState.monitors.length} Online`,
             totalCollections: totalCols,
             totalRepos: totalRepos,
-            activeServices: `${activeBotsCount}/2 Online`,
+            activeServices: `${activeBotsCount} Active`,
             ramUsage: `${Math.floor(process.memoryUsage().heapUsed / 1024 / 1024)} MB`,
             uptime: process.uptime()
         });
@@ -312,7 +315,7 @@ app.post('/api/bots/deploy-live', async (req, res) => {
         liveBot.help((ctx) => ctx.reply("KORVIZ jonli bot xizmati faol ishlamoqda."));
         liveBot.on('text', (ctx) => ctx.reply(`Sizning xabaringiz qabul qilindi: ${ctx.message.text}`));
 
-        liveBot.launch();
+        await liveBot.launch();
         activeRunningBots[token] = liveBot;
 
         writeAuditLog("BOT_DEPLOY", `Live telegram bot successfully deployed: ${botName || 'Custom Bot'}`);
@@ -356,7 +359,12 @@ app.post('/api/tools/http-request', async (req, res) => {
 
 // Fallback catch-all for SPA routing
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    const indexPath = path.join(__dirname, 'public', 'index.html');
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(404).send("KORVIZ Enterprise Kernel: Frontend public/index.html not found.");
+    }
 });
 
 // Server Initialization
